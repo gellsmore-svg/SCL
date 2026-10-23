@@ -1,0 +1,13 @@
+{
+  "metamodel": "iomr-evolved",
+  "metamodelVersion": "2.0.0",
+  "model": "meta/iomr-model",
+  "sources": [
+    {
+      "alias": "spec",
+      "ref": "2026-10-23",
+      "path": "docs/IOMR-developer-narrative.md"
+    }
+  ],
+  "expect": []
+}

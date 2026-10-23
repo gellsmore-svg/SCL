@@ -1,0 +1,14 @@
+stages:
+  - test
+
+scl:
+  stage: test
+  image: python:3.12-slim
+  variables:
+    PYTHONPATH: src/tooling
+  script:
+    - python3 -m unittest discover -s tests -v
+    - python3 validate-framework.py
+    - python3 -m scl validate --strict
+    - python3 -m scl export markdown -o /tmp/TRACEABILITY.md
+    - cmp TRACEABILITY.md /tmp/TRACEABILITY.md

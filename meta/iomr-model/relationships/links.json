@@ -1,0 +1,905 @@
+[
+  {
+    "id": "outcome-consistent-frameworks-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-consistent-frameworks",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-consistent-frameworks is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-reproducible-releases-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-reproducible-releases",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-reproducible-releases is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-predictable-upgrades-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-predictable-upgrades",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-predictable-upgrades is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-backwards-compatibility-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-backwards-compatibility",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-backwards-compatibility is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-releases-mean-consumer-impact-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-releases-mean-consumer-impact",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-releases-mean-consumer-impact is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-ai-consumable-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-ai-consumable",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-ai-consumable is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-intent-visible-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-intent-visible",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-intent-visible is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-context-survives-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-context-survives",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-context-survives is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-ai-outcome-aligned-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-ai-outcome-aligned",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-ai-outcome-aligned is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-ai-understanding-inspectable-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-ai-understanding-inspectable",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-ai-understanding-inspectable is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-reviewers-understand-min-constraint-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-reviewers-understand-min-constraint",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-reviewers-understand-min-constraint is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-uncertainty-visible-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-uncertainty-visible",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-uncertainty-visible is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "outcome-prerequisites-verified-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-prerequisites-verified",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-prerequisites-verified is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-constraints-reliable-not-restrictive-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-constraints-reliable-not-restrictive",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-constraints-reliable-not-restrictive is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "outcome-verification-role-aligned-delivers-intent-govern-framework",
+    "type": "delivers",
+    "from": "outcome-verification-role-aligned",
+    "to": "intent-govern-framework",
+    "rationale": "outcome-verification-role-aligned is the observable change that realises intent-govern-framework."
+  },
+  {
+    "id": "model-release-serves-outcome-consistent-frameworks",
+    "type": "serves",
+    "from": "model-release",
+    "to": "outcome-consistent-frameworks",
+    "rationale": "model-release is the interaction that produces or enables outcome-consistent-frameworks."
+  },
+  {
+    "id": "model-release-serves-outcome-reproducible-releases",
+    "type": "serves",
+    "from": "model-release",
+    "to": "outcome-reproducible-releases",
+    "rationale": "model-release is the interaction that produces or enables outcome-reproducible-releases."
+  },
+  {
+    "id": "model-repository-serves-outcome-consistent-frameworks",
+    "type": "serves",
+    "from": "model-repository",
+    "to": "outcome-consistent-frameworks",
+    "rationale": "model-repository is the interaction that produces or enables outcome-consistent-frameworks."
+  },
+  {
+    "id": "model-governance-serves-outcome-consistent-frameworks",
+    "type": "serves",
+    "from": "model-governance",
+    "to": "outcome-consistent-frameworks",
+    "rationale": "model-governance is the interaction that produces or enables outcome-consistent-frameworks."
+  },
+  {
+    "id": "model-upgrade-serves-outcome-predictable-upgrades",
+    "type": "serves",
+    "from": "model-upgrade",
+    "to": "outcome-predictable-upgrades",
+    "rationale": "model-upgrade is the interaction that produces or enables outcome-predictable-upgrades."
+  },
+  {
+    "id": "model-upgrade-serves-outcome-backwards-compatibility",
+    "type": "serves",
+    "from": "model-upgrade",
+    "to": "outcome-backwards-compatibility",
+    "rationale": "model-upgrade is the interaction that produces or enables outcome-backwards-compatibility."
+  },
+  {
+    "id": "model-release-eligibility-serves-outcome-predictable-upgrades",
+    "type": "serves",
+    "from": "model-release-eligibility",
+    "to": "outcome-predictable-upgrades",
+    "rationale": "model-release-eligibility is the interaction that produces or enables outcome-predictable-upgrades."
+  },
+  {
+    "id": "model-release-eligibility-serves-outcome-releases-mean-consumer-impact",
+    "type": "serves",
+    "from": "model-release-eligibility",
+    "to": "outcome-releases-mean-consumer-impact",
+    "rationale": "model-release-eligibility is the interaction that produces or enables outcome-releases-mean-consumer-impact."
+  },
+  {
+    "id": "model-development-release-lifecycle-serves-outcome-releases-mean-consumer-impact",
+    "type": "serves",
+    "from": "model-development-release-lifecycle",
+    "to": "outcome-releases-mean-consumer-impact",
+    "rationale": "model-development-release-lifecycle is the interaction that produces or enables outcome-releases-mean-consumer-impact."
+  },
+  {
+    "id": "model-development-release-lifecycle-serves-outcome-predictable-upgrades",
+    "type": "serves",
+    "from": "model-development-release-lifecycle",
+    "to": "outcome-predictable-upgrades",
+    "rationale": "model-development-release-lifecycle is the interaction that produces or enables outcome-predictable-upgrades."
+  },
+  {
+    "id": "model-ai-consumption-serves-outcome-ai-consumable",
+    "type": "serves",
+    "from": "model-ai-consumption",
+    "to": "outcome-ai-consumable",
+    "rationale": "model-ai-consumption is the interaction that produces or enables outcome-ai-consumable."
+  },
+  {
+    "id": "model-contextual-reasoning-serves-outcome-intent-visible",
+    "type": "serves",
+    "from": "model-contextual-reasoning",
+    "to": "outcome-intent-visible",
+    "rationale": "model-contextual-reasoning is the interaction that produces or enables outcome-intent-visible."
+  },
+  {
+    "id": "model-contextual-reasoning-serves-outcome-context-survives",
+    "type": "serves",
+    "from": "model-contextual-reasoning",
+    "to": "outcome-context-survives",
+    "rationale": "model-contextual-reasoning is the interaction that produces or enables outcome-context-survives."
+  },
+  {
+    "id": "model-contextual-reasoning-serves-outcome-ai-outcome-aligned",
+    "type": "serves",
+    "from": "model-contextual-reasoning",
+    "to": "outcome-ai-outcome-aligned",
+    "rationale": "model-contextual-reasoning is the interaction that produces or enables outcome-ai-outcome-aligned."
+  },
+  {
+    "id": "model-human-authored-iomr-serves-outcome-ai-outcome-aligned",
+    "type": "serves",
+    "from": "model-human-authored-iomr",
+    "to": "outcome-ai-outcome-aligned",
+    "rationale": "model-human-authored-iomr is the interaction that produces or enables outcome-ai-outcome-aligned."
+  },
+  {
+    "id": "model-ai-inferred-iomr-serves-outcome-ai-outcome-aligned",
+    "type": "serves",
+    "from": "model-ai-inferred-iomr",
+    "to": "outcome-ai-outcome-aligned",
+    "rationale": "model-ai-inferred-iomr is the interaction that produces or enables outcome-ai-outcome-aligned."
+  },
+  {
+    "id": "model-ai-inferred-iomr-serves-outcome-ai-understanding-inspectable",
+    "type": "serves",
+    "from": "model-ai-inferred-iomr",
+    "to": "outcome-ai-understanding-inspectable",
+    "rationale": "model-ai-inferred-iomr is the interaction that produces or enables outcome-ai-understanding-inspectable."
+  },
+  {
+    "id": "model-requirements-narrative-serves-outcome-reviewers-understand-min-constraint",
+    "type": "serves",
+    "from": "model-requirements-narrative",
+    "to": "outcome-reviewers-understand-min-constraint",
+    "rationale": "model-requirements-narrative is the interaction that produces or enables outcome-reviewers-understand-min-constraint."
+  },
+  {
+    "id": "model-open-question-management-serves-outcome-uncertainty-visible",
+    "type": "serves",
+    "from": "model-open-question-management",
+    "to": "outcome-uncertainty-visible",
+    "rationale": "model-open-question-management is the interaction that produces or enables outcome-uncertainty-visible."
+  },
+  {
+    "id": "model-skill-validation-serves-outcome-prerequisites-verified",
+    "type": "serves",
+    "from": "model-skill-validation",
+    "to": "outcome-prerequisites-verified",
+    "rationale": "model-skill-validation is the interaction that produces or enables outcome-prerequisites-verified."
+  },
+  {
+    "id": "model-interpreter-contract-serves-outcome-constraints-reliable-not-restrictive",
+    "type": "serves",
+    "from": "model-interpreter-contract",
+    "to": "outcome-constraints-reliable-not-restrictive",
+    "rationale": "model-interpreter-contract is the interaction that produces or enables outcome-constraints-reliable-not-restrictive."
+  },
+  {
+    "id": "model-conformance-check-serves-outcome-constraints-reliable-not-restrictive",
+    "type": "serves",
+    "from": "model-conformance-check",
+    "to": "outcome-constraints-reliable-not-restrictive",
+    "rationale": "model-conformance-check is the interaction that produces or enables outcome-constraints-reliable-not-restrictive."
+  },
+  {
+    "id": "model-verification-role-serves-outcome-verification-role-aligned",
+    "type": "serves",
+    "from": "model-verification-role",
+    "to": "outcome-verification-role-aligned",
+    "rationale": "model-verification-role is the interaction that produces or enables outcome-verification-role-aligned."
+  },
+  {
+    "id": "model-canonical-test-definition-serves-outcome-verification-role-aligned",
+    "type": "serves",
+    "from": "model-canonical-test-definition",
+    "to": "outcome-verification-role-aligned",
+    "rationale": "model-canonical-test-definition is the interaction that produces or enables outcome-verification-role-aligned."
+  },
+  {
+    "id": "model-execution-adapter-serves-outcome-verification-role-aligned",
+    "type": "serves",
+    "from": "model-execution-adapter",
+    "to": "outcome-verification-role-aligned",
+    "rationale": "model-execution-adapter is the interaction that produces or enables outcome-verification-role-aligned."
+  },
+  {
+    "id": "requirement-versioned-specifies-model-release",
+    "type": "specifies",
+    "from": "requirement-versioned",
+    "to": "model-release",
+    "rationale": "requirement-versioned defines a constraint on the interaction model-release."
+  },
+  {
+    "id": "requirement-change-docs-specifies-model-release",
+    "type": "specifies",
+    "from": "requirement-change-docs",
+    "to": "model-release",
+    "rationale": "requirement-change-docs defines a constraint on the interaction model-release."
+  },
+  {
+    "id": "requirement-reproducible-specifies-model-release",
+    "type": "specifies",
+    "from": "requirement-reproducible",
+    "to": "model-release",
+    "rationale": "requirement-reproducible defines a constraint on the interaction model-release."
+  },
+  {
+    "id": "requirement-self-contained-specifies-model-release",
+    "type": "specifies",
+    "from": "requirement-self-contained",
+    "to": "model-release",
+    "rationale": "requirement-self-contained defines a constraint on the interaction model-release."
+  },
+  {
+    "id": "requirement-repository-structure-specifies-model-repository",
+    "type": "specifies",
+    "from": "requirement-repository-structure",
+    "to": "model-repository",
+    "rationale": "requirement-repository-structure defines a constraint on the interaction model-repository."
+  },
+  {
+    "id": "requirement-validation-instructions-specifies-model-governance",
+    "type": "specifies",
+    "from": "requirement-validation-instructions",
+    "to": "model-governance",
+    "rationale": "requirement-validation-instructions defines a constraint on the interaction model-governance."
+  },
+  {
+    "id": "requirement-consistency-validation-specifies-model-governance",
+    "type": "specifies",
+    "from": "requirement-consistency-validation",
+    "to": "model-governance",
+    "rationale": "requirement-consistency-validation defines a constraint on the interaction model-governance."
+  },
+  {
+    "id": "requirement-refines-discipline-enforced-specifies-model-governance",
+    "type": "specifies",
+    "from": "requirement-refines-discipline-enforced",
+    "to": "model-governance",
+    "rationale": "requirement-refines-discipline-enforced defines a constraint on the interaction model-governance."
+  },
+  {
+    "id": "requirement-upgrade-instructions-specifies-model-upgrade",
+    "type": "specifies",
+    "from": "requirement-upgrade-instructions",
+    "to": "model-upgrade",
+    "rationale": "requirement-upgrade-instructions defines a constraint on the interaction model-upgrade."
+  },
+  {
+    "id": "requirement-release-eligibility-specifies-model-release-eligibility",
+    "type": "specifies",
+    "from": "requirement-release-eligibility",
+    "to": "model-release-eligibility",
+    "rationale": "requirement-release-eligibility defines a constraint on the interaction model-release-eligibility."
+  },
+  {
+    "id": "requirement-consumer-impact-test-specifies-model-release-eligibility",
+    "type": "specifies",
+    "from": "requirement-consumer-impact-test",
+    "to": "model-release-eligibility",
+    "rationale": "requirement-consumer-impact-test defines a constraint on the interaction model-release-eligibility."
+  },
+  {
+    "id": "requirement-lifecycle-four-steps-specifies-model-development-release-lifecycle",
+    "type": "specifies",
+    "from": "requirement-lifecycle-four-steps",
+    "to": "model-development-release-lifecycle",
+    "rationale": "requirement-lifecycle-four-steps defines a constraint on the interaction model-development-release-lifecycle."
+  },
+  {
+    "id": "requirement-model-is-source-of-truth-specifies-model-development-release-lifecycle",
+    "type": "specifies",
+    "from": "requirement-model-is-source-of-truth",
+    "to": "model-development-release-lifecycle",
+    "rationale": "requirement-model-is-source-of-truth defines a constraint on the interaction model-development-release-lifecycle."
+  },
+  {
+    "id": "requirement-ai-test-before-release-specifies-model-development-release-lifecycle",
+    "type": "specifies",
+    "from": "requirement-ai-test-before-release",
+    "to": "model-development-release-lifecycle",
+    "rationale": "requirement-ai-test-before-release defines a constraint on the interaction model-development-release-lifecycle."
+  },
+  {
+    "id": "requirement-version-discovery-specifies-model-ai-consumption",
+    "type": "specifies",
+    "from": "requirement-version-discovery",
+    "to": "model-ai-consumption",
+    "rationale": "requirement-version-discovery defines a constraint on the interaction model-ai-consumption."
+  },
+  {
+    "id": "requirement-capture-why-specifies-model-contextual-reasoning",
+    "type": "specifies",
+    "from": "requirement-capture-why",
+    "to": "model-contextual-reasoning",
+    "rationale": "requirement-capture-why defines a constraint on the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "requirement-context-persistent-inspectable-specifies-model-contextual-reasoning",
+    "type": "specifies",
+    "from": "requirement-context-persistent-inspectable",
+    "to": "model-contextual-reasoning",
+    "rationale": "requirement-context-persistent-inspectable defines a constraint on the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "requirement-raise-gap-challenge-specifies-model-contextual-reasoning",
+    "type": "specifies",
+    "from": "requirement-raise-gap-challenge",
+    "to": "model-contextual-reasoning",
+    "rationale": "requirement-raise-gap-challenge defines a constraint on the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "requirement-model-holds-test-preconditions-specifies-model-contextual-reasoning",
+    "type": "specifies",
+    "from": "requirement-model-holds-test-preconditions",
+    "to": "model-contextual-reasoning",
+    "rationale": "requirement-model-holds-test-preconditions defines a constraint on the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "requirement-support-human-authored-mode-specifies-model-human-authored-iomr",
+    "type": "specifies",
+    "from": "requirement-support-human-authored-mode",
+    "to": "model-human-authored-iomr",
+    "rationale": "requirement-support-human-authored-mode defines a constraint on the interaction model-human-authored-iomr."
+  },
+  {
+    "id": "requirement-support-ai-inferred-mode-specifies-model-ai-inferred-iomr",
+    "type": "specifies",
+    "from": "requirement-support-ai-inferred-mode",
+    "to": "model-ai-inferred-iomr",
+    "rationale": "requirement-support-ai-inferred-mode defines a constraint on the interaction model-ai-inferred-iomr."
+  },
+  {
+    "id": "requirement-expose-ai-understanding-specifies-model-ai-inferred-iomr",
+    "type": "specifies",
+    "from": "requirement-expose-ai-understanding",
+    "to": "model-ai-inferred-iomr",
+    "rationale": "requirement-expose-ai-understanding defines a constraint on the interaction model-ai-inferred-iomr."
+  },
+  {
+    "id": "requirement-emergent-design-surfaced-specifies-model-ai-inferred-iomr",
+    "type": "specifies",
+    "from": "requirement-emergent-design-surfaced",
+    "to": "model-ai-inferred-iomr",
+    "rationale": "requirement-emergent-design-surfaced defines a constraint on the interaction model-ai-inferred-iomr."
+  },
+  {
+    "id": "requirement-narrative-per-role-specifies-model-requirements-narrative",
+    "type": "specifies",
+    "from": "requirement-narrative-per-role",
+    "to": "model-requirements-narrative",
+    "rationale": "requirement-narrative-per-role defines a constraint on the interaction model-requirements-narrative."
+  },
+  {
+    "id": "requirement-narrative-role-scope-specifies-model-requirements-narrative",
+    "type": "specifies",
+    "from": "requirement-narrative-role-scope",
+    "to": "model-requirements-narrative",
+    "rationale": "requirement-narrative-role-scope defines a constraint on the interaction model-requirements-narrative."
+  },
+  {
+    "id": "requirement-narrative-human-constraint-budget-specifies-model-requirements-narrative",
+    "type": "specifies",
+    "from": "requirement-narrative-human-constraint-budget",
+    "to": "model-requirements-narrative",
+    "rationale": "requirement-narrative-human-constraint-budget defines a constraint on the interaction model-requirements-narrative."
+  },
+  {
+    "id": "requirement-narrative-traceable-specifies-model-requirements-narrative",
+    "type": "specifies",
+    "from": "requirement-narrative-traceable",
+    "to": "model-requirements-narrative",
+    "rationale": "requirement-narrative-traceable defines a constraint on the interaction model-requirements-narrative."
+  },
+  {
+    "id": "requirement-narrative-flag-manual-eval-specifies-model-requirements-narrative",
+    "type": "specifies",
+    "from": "requirement-narrative-flag-manual-eval",
+    "to": "model-requirements-narrative",
+    "rationale": "requirement-narrative-flag-manual-eval defines a constraint on the interaction model-requirements-narrative."
+  },
+  {
+    "id": "requirement-open-questions-central-specifies-model-open-question-management",
+    "type": "specifies",
+    "from": "requirement-open-questions-central",
+    "to": "model-open-question-management",
+    "rationale": "requirement-open-questions-central defines a constraint on the interaction model-open-question-management."
+  },
+  {
+    "id": "requirement-open-question-fields-specifies-model-open-question-management",
+    "type": "specifies",
+    "from": "requirement-open-question-fields",
+    "to": "model-open-question-management",
+    "rationale": "requirement-open-question-fields defines a constraint on the interaction model-open-question-management."
+  },
+  {
+    "id": "requirement-open-question-influence-specifies-model-open-question-management",
+    "type": "specifies",
+    "from": "requirement-open-question-influence",
+    "to": "model-open-question-management",
+    "rationale": "requirement-open-question-influence defines a constraint on the interaction model-open-question-management."
+  },
+  {
+    "id": "requirement-skills-registry-specifies-model-skill-validation",
+    "type": "specifies",
+    "from": "requirement-skills-registry",
+    "to": "model-skill-validation",
+    "rationale": "requirement-skills-registry defines a constraint on the interaction model-skill-validation."
+  },
+  {
+    "id": "requirement-verify-skills-before-ops-specifies-model-skill-validation",
+    "type": "specifies",
+    "from": "requirement-verify-skills-before-ops",
+    "to": "model-skill-validation",
+    "rationale": "requirement-verify-skills-before-ops defines a constraint on the interaction model-skill-validation."
+  },
+  {
+    "id": "requirement-interpreter-honours-layers-specifies-model-interpreter-contract",
+    "type": "specifies",
+    "from": "requirement-interpreter-honours-layers",
+    "to": "model-interpreter-contract",
+    "rationale": "requirement-interpreter-honours-layers defines a constraint on the interaction model-interpreter-contract."
+  },
+  {
+    "id": "requirement-no-expressiveness-penalty-specifies-model-interpreter-contract",
+    "type": "specifies",
+    "from": "requirement-no-expressiveness-penalty",
+    "to": "model-interpreter-contract",
+    "rationale": "requirement-no-expressiveness-penalty defines a constraint on the interaction model-interpreter-contract."
+  },
+  {
+    "id": "requirement-conformance-per-requirement-specifies-model-conformance-check",
+    "type": "specifies",
+    "from": "requirement-conformance-per-requirement",
+    "to": "model-conformance-check",
+    "rationale": "requirement-conformance-per-requirement defines a constraint on the interaction model-conformance-check."
+  },
+  {
+    "id": "requirement-declare-verification-role-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-declare-verification-role",
+    "to": "model-verification-role",
+    "rationale": "requirement-declare-verification-role defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-unit-scope-single-model-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-unit-scope-single-model",
+    "to": "model-verification-role",
+    "rationale": "requirement-unit-scope-single-model defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-solution-scope-trace-chain-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-solution-scope-trace-chain",
+    "to": "model-verification-role",
+    "rationale": "requirement-solution-scope-trace-chain defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-repin-triage-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-repin-triage",
+    "to": "model-verification-role",
+    "rationale": "requirement-repin-triage defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-solution-coverage-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-solution-coverage",
+    "to": "model-verification-role",
+    "rationale": "requirement-solution-coverage defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-cross-system-contract-specifies-model-verification-role",
+    "type": "specifies",
+    "from": "requirement-cross-system-contract",
+    "to": "model-verification-role",
+    "rationale": "requirement-cross-system-contract defines a constraint on the interaction model-verification-role."
+  },
+  {
+    "id": "requirement-test-definition-framework-agnostic-specifies-model-canonical-test-definition",
+    "type": "specifies",
+    "from": "requirement-test-definition-framework-agnostic",
+    "to": "model-canonical-test-definition",
+    "rationale": "requirement-test-definition-framework-agnostic defines a constraint on the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "requirement-ctd-declarative-specifies-model-canonical-test-definition",
+    "type": "specifies",
+    "from": "requirement-ctd-declarative",
+    "to": "model-canonical-test-definition",
+    "rationale": "requirement-ctd-declarative defines a constraint on the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "requirement-semantic-locator-contract-specifies-model-canonical-test-definition",
+    "type": "specifies",
+    "from": "requirement-semantic-locator-contract",
+    "to": "model-canonical-test-definition",
+    "rationale": "requirement-semantic-locator-contract defines a constraint on the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "requirement-canonical-test-result-specifies-model-canonical-test-definition",
+    "type": "specifies",
+    "from": "requirement-canonical-test-result",
+    "to": "model-canonical-test-definition",
+    "rationale": "requirement-canonical-test-result defines a constraint on the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "requirement-execution-adapter-deterministic-specifies-model-execution-adapter",
+    "type": "specifies",
+    "from": "requirement-execution-adapter-deterministic",
+    "to": "model-execution-adapter",
+    "rationale": "requirement-execution-adapter-deterministic defines a constraint on the interaction model-execution-adapter."
+  },
+  {
+    "id": "requirement-provisioning-separate-specifies-model-execution-adapter",
+    "type": "specifies",
+    "from": "requirement-provisioning-separate",
+    "to": "model-execution-adapter",
+    "rationale": "requirement-provisioning-separate defines a constraint on the interaction model-execution-adapter."
+  },
+  {
+    "id": "requirement-secrets-referenced-not-embedded-specifies-model-execution-adapter",
+    "type": "specifies",
+    "from": "requirement-secrets-referenced-not-embedded",
+    "to": "model-execution-adapter",
+    "rationale": "requirement-secrets-referenced-not-embedded defines a constraint on the interaction model-execution-adapter."
+  },
+  {
+    "id": "model-release-involves-system-source",
+    "type": "involves",
+    "from": "model-release",
+    "to": "system-source",
+    "rationale": "system-source takes part in the interaction model-release."
+  },
+  {
+    "id": "model-release-involves-system-release-kit",
+    "type": "involves",
+    "from": "model-release",
+    "to": "system-release-kit",
+    "rationale": "system-release-kit takes part in the interaction model-release."
+  },
+  {
+    "id": "model-repository-involves-system-validator",
+    "type": "involves",
+    "from": "model-repository",
+    "to": "system-validator",
+    "rationale": "system-validator takes part in the interaction model-repository."
+  },
+  {
+    "id": "model-repository-involves-system-repository",
+    "type": "involves",
+    "from": "model-repository",
+    "to": "system-repository",
+    "rationale": "system-repository takes part in the interaction model-repository."
+  },
+  {
+    "id": "model-governance-involves-system-validator",
+    "type": "involves",
+    "from": "model-governance",
+    "to": "system-validator",
+    "rationale": "system-validator takes part in the interaction model-governance."
+  },
+  {
+    "id": "model-governance-involves-system-repository",
+    "type": "involves",
+    "from": "model-governance",
+    "to": "system-repository",
+    "rationale": "system-repository takes part in the interaction model-governance."
+  },
+  {
+    "id": "model-upgrade-involves-actor-maintainer",
+    "type": "involves",
+    "from": "model-upgrade",
+    "to": "actor-maintainer",
+    "rationale": "actor-maintainer takes part in the interaction model-upgrade."
+  },
+  {
+    "id": "model-upgrade-involves-system-scl-kit",
+    "type": "involves",
+    "from": "model-upgrade",
+    "to": "system-scl-kit",
+    "rationale": "system-scl-kit takes part in the interaction model-upgrade."
+  },
+  {
+    "id": "model-release-eligibility-involves-system-validator",
+    "type": "involves",
+    "from": "model-release-eligibility",
+    "to": "system-validator",
+    "rationale": "system-validator takes part in the interaction model-release-eligibility."
+  },
+  {
+    "id": "model-release-eligibility-involves-system-repository",
+    "type": "involves",
+    "from": "model-release-eligibility",
+    "to": "system-repository",
+    "rationale": "system-repository takes part in the interaction model-release-eligibility."
+  },
+  {
+    "id": "model-development-release-lifecycle-involves-actor-maintainer",
+    "type": "involves",
+    "from": "model-development-release-lifecycle",
+    "to": "actor-maintainer",
+    "rationale": "actor-maintainer takes part in the interaction model-development-release-lifecycle."
+  },
+  {
+    "id": "model-development-release-lifecycle-involves-system-scl-kit",
+    "type": "involves",
+    "from": "model-development-release-lifecycle",
+    "to": "system-scl-kit",
+    "rationale": "system-scl-kit takes part in the interaction model-development-release-lifecycle."
+  },
+  {
+    "id": "model-ai-consumption-involves-system-ai-tool",
+    "type": "involves",
+    "from": "model-ai-consumption",
+    "to": "system-ai-tool",
+    "rationale": "system-ai-tool takes part in the interaction model-ai-consumption."
+  },
+  {
+    "id": "model-ai-consumption-involves-system-project-manifest",
+    "type": "involves",
+    "from": "model-ai-consumption",
+    "to": "system-project-manifest",
+    "rationale": "system-project-manifest takes part in the interaction model-ai-consumption."
+  },
+  {
+    "id": "model-contextual-reasoning-involves-actor-author",
+    "type": "involves",
+    "from": "model-contextual-reasoning",
+    "to": "actor-author",
+    "rationale": "actor-author takes part in the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "model-contextual-reasoning-involves-system-iomr-model",
+    "type": "involves",
+    "from": "model-contextual-reasoning",
+    "to": "system-iomr-model",
+    "rationale": "system-iomr-model takes part in the interaction model-contextual-reasoning."
+  },
+  {
+    "id": "model-human-authored-iomr-involves-actor-author",
+    "type": "involves",
+    "from": "model-human-authored-iomr",
+    "to": "actor-author",
+    "rationale": "actor-author takes part in the interaction model-human-authored-iomr."
+  },
+  {
+    "id": "model-human-authored-iomr-involves-system-ai-harness",
+    "type": "involves",
+    "from": "model-human-authored-iomr",
+    "to": "system-ai-harness",
+    "rationale": "system-ai-harness takes part in the interaction model-human-authored-iomr."
+  },
+  {
+    "id": "model-ai-inferred-iomr-involves-actor-author",
+    "type": "involves",
+    "from": "model-ai-inferred-iomr",
+    "to": "actor-author",
+    "rationale": "actor-author takes part in the interaction model-ai-inferred-iomr."
+  },
+  {
+    "id": "model-ai-inferred-iomr-involves-system-ai-harness",
+    "type": "involves",
+    "from": "model-ai-inferred-iomr",
+    "to": "system-ai-harness",
+    "rationale": "system-ai-harness takes part in the interaction model-ai-inferred-iomr."
+  },
+  {
+    "id": "model-requirements-narrative-involves-system-narrative-generator",
+    "type": "involves",
+    "from": "model-requirements-narrative",
+    "to": "system-narrative-generator",
+    "rationale": "system-narrative-generator takes part in the interaction model-requirements-narrative."
+  },
+  {
+    "id": "model-requirements-narrative-involves-system-iomr-model",
+    "type": "involves",
+    "from": "model-requirements-narrative",
+    "to": "system-iomr-model",
+    "rationale": "system-iomr-model takes part in the interaction model-requirements-narrative."
+  },
+  {
+    "id": "model-open-question-management-involves-actor-maintainer",
+    "type": "involves",
+    "from": "model-open-question-management",
+    "to": "actor-maintainer",
+    "rationale": "actor-maintainer takes part in the interaction model-open-question-management."
+  },
+  {
+    "id": "model-open-question-management-involves-system-repository",
+    "type": "involves",
+    "from": "model-open-question-management",
+    "to": "system-repository",
+    "rationale": "system-repository takes part in the interaction model-open-question-management."
+  },
+  {
+    "id": "model-skill-validation-involves-system-ai-harness",
+    "type": "involves",
+    "from": "model-skill-validation",
+    "to": "system-ai-harness",
+    "rationale": "system-ai-harness takes part in the interaction model-skill-validation."
+  },
+  {
+    "id": "model-skill-validation-involves-system-skills-registry",
+    "type": "involves",
+    "from": "model-skill-validation",
+    "to": "system-skills-registry",
+    "rationale": "system-skills-registry takes part in the interaction model-skill-validation."
+  },
+  {
+    "id": "model-interpreter-contract-involves-system-interpreter",
+    "type": "involves",
+    "from": "model-interpreter-contract",
+    "to": "system-interpreter",
+    "rationale": "system-interpreter takes part in the interaction model-interpreter-contract."
+  },
+  {
+    "id": "model-interpreter-contract-involves-system-iomr-model",
+    "type": "involves",
+    "from": "model-interpreter-contract",
+    "to": "system-iomr-model",
+    "rationale": "system-iomr-model takes part in the interaction model-interpreter-contract."
+  },
+  {
+    "id": "model-conformance-check-involves-system-validator",
+    "type": "involves",
+    "from": "model-conformance-check",
+    "to": "system-validator",
+    "rationale": "system-validator takes part in the interaction model-conformance-check."
+  },
+  {
+    "id": "model-conformance-check-involves-system-iomr-model",
+    "type": "involves",
+    "from": "model-conformance-check",
+    "to": "system-iomr-model",
+    "rationale": "system-iomr-model takes part in the interaction model-conformance-check."
+  },
+  {
+    "id": "model-verification-role-involves-actor-developer",
+    "type": "involves",
+    "from": "model-verification-role",
+    "to": "actor-developer",
+    "rationale": "actor-developer takes part in the interaction model-verification-role."
+  },
+  {
+    "id": "model-verification-role-involves-system-ai-harness",
+    "type": "involves",
+    "from": "model-verification-role",
+    "to": "system-ai-harness",
+    "rationale": "system-ai-harness takes part in the interaction model-verification-role."
+  },
+  {
+    "id": "model-canonical-test-definition-involves-system-validator",
+    "type": "involves",
+    "from": "model-canonical-test-definition",
+    "to": "system-validator",
+    "rationale": "system-validator takes part in the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "model-canonical-test-definition-involves-system-iomr-model",
+    "type": "involves",
+    "from": "model-canonical-test-definition",
+    "to": "system-iomr-model",
+    "rationale": "system-iomr-model takes part in the interaction model-canonical-test-definition."
+  },
+  {
+    "id": "model-execution-adapter-involves-system-ai-harness",
+    "type": "involves",
+    "from": "model-execution-adapter",
+    "to": "system-ai-harness",
+    "rationale": "system-ai-harness takes part in the interaction model-execution-adapter."
+  },
+  {
+    "id": "model-execution-adapter-involves-system-consumer-repo",
+    "type": "involves",
+    "from": "model-execution-adapter",
+    "to": "system-consumer-repo",
+    "rationale": "system-consumer-repo takes part in the interaction model-execution-adapter."
+  },
+  {
+    "id": "policy-consumer-impact-constrains-model-release-eligibility",
+    "type": "constrains",
+    "from": "policy-consumer-impact",
+    "to": "model-release-eligibility",
+    "rationale": "The policy bounds when model-release-eligibility may cut a release."
+  },
+  {
+    "id": "intent-govern-framework-belongs_to-project-scl",
+    "type": "belongs_to",
+    "from": "intent-govern-framework",
+    "to": "project-scl",
+    "rationale": "This intent is part of the SCL project."
+  },
+  {
+    "id": "intent-externalise-context-belongs_to-project-scl",
+    "type": "belongs_to",
+    "from": "intent-externalise-context",
+    "to": "project-scl",
+    "rationale": "This intent is part of the SCL project."
+  },
+  {
+    "id": "model-requirements-narrative-involves-actor-reviewer",
+    "type": "involves",
+    "from": "model-requirements-narrative",
+    "to": "actor-reviewer",
+    "rationale": "actor-reviewer takes part in the interaction model-requirements-narrative."
+  }
+]

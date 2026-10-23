@@ -1,0 +1,1728 @@
+[
+  {
+    "id": "project-scl",
+    "type": "Project",
+    "name": "SCL",
+    "description": "SCL is the IOMR framework: one authoritative model, and the constraints an implementation builds within.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "intent-govern-framework",
+    "type": "Intent",
+    "name": "Govern framework evolution",
+    "description": "The framework holds itself to the same bar it sets for other systems: evolve without breaking consumers, ship reproducible changes, and make upgrades predictable.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "intent-externalise-context",
+    "type": "Intent",
+    "name": "Externalise context",
+    "description": "Intent, outcomes, rules, and assumptions live in a form a person and an AI can both consume, so generated work stays aligned with the reason the work exists.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-consistent-frameworks",
+    "type": "Outcome",
+    "name": "Consistent frameworks",
+    "description": "Releases are consistent from one cut to the next.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "validate-framework.py reports VALID with zero errors."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-reproducible-releases",
+    "type": "Outcome",
+    "name": "Reproducible releases",
+    "description": "A release rebuilt from the tagged source is byte-identical.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "Kit digest matches a rebuild from the file list."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-predictable-upgrades",
+    "type": "Outcome",
+    "name": "Predictable upgrades",
+    "description": "A consumer can see what an upgrade will change before taking it.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 2 \u2014 Upgrades are predictable"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "Each release after the first ships an upgrade guide."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-backwards-compatibility",
+    "type": "Outcome",
+    "name": "Backwards compatibility where practical",
+    "description": "Existing consumers keep working except where a recorded change says otherwise.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 2 \u2014 Upgrades are predictable"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "judgement",
+      "measure": "A maintainer judges whether compatibility was kept where practical. There is no automated gate.",
+      "businessConsequence": "A person decides whether older projects still work, where that is practical."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-releases-mean-consumer-impact",
+    "type": "Outcome",
+    "name": "Releases mean consumer impact",
+    "description": "A release exists only when a consuming project would behave differently.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "Internal-only changes do not cut a release.",
+      "businessConsequence": "A release means something a consuming project would actually notice."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-ai-consumable",
+    "type": "Outcome",
+    "name": "AI-consumable assets",
+    "description": "A tool can discover the framework version and the model without a person in the loop.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 4 \u2014 AI tools can consume the assets"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "A project manifest resolves version, model location, and upgrade eligibility.",
+      "businessConsequence": "A tool can tell which version a project uses without asking a person."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-intent-visible",
+    "type": "Outcome",
+    "name": "Intent visible",
+    "description": "Every requirement traces up to a reason the work exists.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "The chain from each requirement reaches an intent.",
+      "businessConsequence": "Every rule points back to why the work exists."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-context-survives",
+    "type": "Outcome",
+    "name": "Context survives",
+    "description": "The reasons survive people leaving and sessions ending.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "judgement",
+      "measure": "A person judges whether the captured context is actually sufficient. Validation only proves the structure is present.",
+      "businessConsequence": "A new person can reconstruct the reasons from the project alone."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-ai-outcome-aligned",
+    "type": "Outcome",
+    "name": "AI stays outcome-aligned",
+    "description": "Generated work follows the outcomes rather than a misunderstanding of them.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "judgement",
+      "measure": "A person judges alignment. The model can show structure, not correctness of intent.",
+      "businessConsequence": "A person can tell whether the generated work still serves the outcome."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-ai-understanding-inspectable",
+    "type": "Outcome",
+    "name": "AI understanding inspectable",
+    "description": "A person can inspect what the AI thought the request meant before anything is built.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 6 \u2014 The AI's understanding is inspectable before implementation"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "judgement",
+      "measure": "A person judges whether the inferred slice understood the request.",
+      "businessConsequence": "You can read what the assistant assumed before any build starts."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-reviewers-understand-min-constraint",
+    "type": "Outcome",
+    "name": "Reviewers understand at minimum cost",
+    "description": "A reviewer reaches their next step without a dropped constraint and without wasted effort.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "vector",
+      "measure": "A person judges whether the narrative was short enough and still complete for that role. This is a trade-off, not a pass or fail.",
+      "businessConsequence": "The write-up is as short as it can be without hiding a risk the reader owns."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-uncertainty-visible",
+    "type": "Outcome",
+    "name": "Uncertainty visible",
+    "description": "Unresolved questions stay visible and influence recommendations.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 8 \u2014 Unresolved uncertainty is visible, not hidden"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "judgement",
+      "measure": "A person judges whether a hidden assumption remains. The register proves the questions that were written down.",
+      "businessConsequence": "Open risks stay on a single list, and a recommendation that depends on one says so."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-prerequisites-verified",
+    "type": "Outcome",
+    "name": "Prerequisites verified",
+    "description": "Significant operations run only after required skills are verified.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 9 \u2014 Required skills are verified before significant operations"
+      ],
+      "evaluation": "mixed",
+      "measurement": "mixed",
+      "measure": "The harness halts when a critical skill is missing. A person still judges whether the skill text is the right one.",
+      "businessConsequence": "Work stops when a critical skill is missing, and says what to restore."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-constraints-reliable-not-restrictive",
+    "type": "Outcome",
+    "name": "Constraints bound without restricting",
+    "description": "The constraint language rejects real violations and still accepts a novel solution that conforms.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "vector",
+      "measure": "A person judges the trade-off between staying in bounds and allowing an unfamiliar conforming solution. OQ-001 asks where the line is.",
+      "businessConsequence": "Rules block real violations and still allow a new approach that follows the rules."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "outcome-verification-role-aligned",
+    "type": "Outcome",
+    "name": "Verification matches the repo role",
+    "description": "A repo verifies the scope its role names, against one pinned model, without a second truth.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "evaluation": "human-judgement",
+      "measurement": "vector",
+      "measure": "A person judges whether role-scoped checks and a single pinned snapshot stay in balance. The requirements are planned.",
+      "businessConsequence": "The project checks the right scope and does not keep a second, drifting copy of the truth."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "actor-maintainer",
+    "type": "Actor",
+    "name": "Maintainer",
+    "description": "The person who cuts a release and owns the human green light.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "actor-author",
+    "type": "Actor",
+    "name": "Author",
+    "description": "The person who writes or approves intent, outcomes, and requirements.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "actor-developer",
+    "type": "Actor",
+    "name": "Developer",
+    "description": "The person who builds within the constraints.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "actor-reviewer",
+    "type": "Actor",
+    "name": "Reviewer",
+    "description": "The person who reads a role narrative and takes the next step.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-source",
+    "type": "System",
+    "name": "Source tree",
+    "description": "The tagged source a release is built from.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-release-kit",
+    "type": "System",
+    "name": "Release kit",
+    "description": "The consumable bytes of one release.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-validator",
+    "type": "System",
+    "name": "Validator",
+    "description": "The checker that reports VALID or a list of findings.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-repository",
+    "type": "System",
+    "name": "Repository",
+    "description": "The project tree that holds the model and the releases.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-scl-kit",
+    "type": "System",
+    "name": "SCL kit",
+    "description": "The framework assets a consuming project uses.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-ai-tool",
+    "type": "System",
+    "name": "AI tool",
+    "description": "A tool that reads a project manifest without a person in the loop.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-project-manifest",
+    "type": "System",
+    "name": "Project manifest",
+    "description": "The file that names the framework version, the model, and upgrade eligibility.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-ai-harness",
+    "type": "System",
+    "name": "AI harness",
+    "description": "The agent host that discovers skills and proposes slices.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-iomr-model",
+    "type": "System",
+    "name": "IOMR model",
+    "description": "The authoritative JSON model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-narrative-generator",
+    "type": "System",
+    "name": "Narrative generator",
+    "description": "The exporter that writes role narratives from the model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-skills-registry",
+    "type": "System",
+    "name": "Skills registry",
+    "description": "The list of skills the harness must verify.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-interpreter",
+    "type": "System",
+    "name": "Interpreter",
+    "description": "The engine that honours layer roles and requirement boundaries.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "system-consumer-repo",
+    "type": "System",
+    "name": "Consumer repository",
+    "description": "A project that verifies against a pinned model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Why the system exists"
+      ]
+    }
+  },
+  {
+    "id": "policy-consumer-impact",
+    "type": "Policy",
+    "name": "Release only on consumer impact",
+    "description": "A release is cut only when at least one project-consumable asset changed. Internal-only edits are framework-development activity.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ]
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "model-release",
+    "type": "Model",
+    "name": "Release",
+    "description": "The interaction that turns tagged source into a consumable release.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "order": 1,
+      "sliceTitle": "Releases are consistent and reproducible"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ],
+    "steps": [
+      {
+        "from": "system-source",
+        "to": "system-release-kit",
+        "message": "tagged source"
+      },
+      {
+        "from": "system-release-kit",
+        "to": "system-source",
+        "message": "byte-identical kit",
+        "kind": "return"
+      }
+    ]
+  },
+  {
+    "id": "model-repository",
+    "type": "Model",
+    "name": "Repository",
+    "description": "The interaction that checks the repository layout against the required shape.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "order": 2,
+      "sliceTitle": "Repository layout"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-governance",
+    "type": "Model",
+    "name": "Governance",
+    "description": "The interaction that applies the release quality gates.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "order": 3,
+      "sliceTitle": "Release quality gates"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-upgrade",
+    "type": "Model",
+    "name": "Upgrade",
+    "description": "The interaction in which a maintainer publishes how to move off the previous release.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 2 \u2014 Upgrades are predictable"
+      ],
+      "order": 4,
+      "sliceTitle": "Upgrades are predictable"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ]
+  },
+  {
+    "id": "model-release-eligibility",
+    "type": "Model",
+    "name": "Release eligibility",
+    "description": "The interaction that decides whether a change set is allowed to become a release.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "order": 5,
+      "sliceTitle": "A release only when consumers are affected"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-development-release-lifecycle",
+    "type": "Model",
+    "name": "Development and release lifecycle",
+    "description": "The interaction that moves a meta-model from candidate to a human green light.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "order": 6,
+      "sliceTitle": "Four-step release lifecycle"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ],
+    "steps": [
+      {
+        "from": "actor-maintainer",
+        "to": "system-scl-kit",
+        "message": "documented green light"
+      },
+      {
+        "from": "system-scl-kit",
+        "to": "actor-maintainer",
+        "message": "consumable release",
+        "kind": "return"
+      }
+    ]
+  },
+  {
+    "id": "model-ai-consumption",
+    "type": "Model",
+    "name": "AI consumption",
+    "description": "The interaction in which a tool reads a project manifest and resolves version, model location, and upgrade eligibility.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 4 \u2014 AI tools can consume the assets"
+      ],
+      "order": 7,
+      "sliceTitle": "AI tools can consume the assets"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-contextual-reasoning",
+    "type": "Model",
+    "name": "Contextual reasoning",
+    "description": "The interaction in which an author records why the work exists, in the repository, and refuses to invent a missing interaction.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "order": 8,
+      "sliceTitle": "The model captures why"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ]
+  },
+  {
+    "id": "model-human-authored-iomr",
+    "type": "Model",
+    "name": "Human-authored IOMR",
+    "description": "The interaction in which a person authors the chain and the assistant treats requirements as hard boundaries.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "order": 9,
+      "sliceTitle": "Human-authored mode"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ]
+  },
+  {
+    "id": "model-ai-inferred-iomr",
+    "type": "Model",
+    "name": "AI-inferred IOMR",
+    "description": "The interaction in which the assistant proposes a slice and waits for a person to approve it.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 6 \u2014 The AI's understanding is inspectable before implementation"
+      ],
+      "order": 10,
+      "sliceTitle": "AI understanding is inspectable before implementation"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ],
+    "steps": [
+      {
+        "from": "actor-author",
+        "to": "system-ai-harness",
+        "message": "high-level request"
+      },
+      {
+        "from": "system-ai-harness",
+        "to": "actor-author",
+        "message": "proposed slice for approval",
+        "kind": "return"
+      }
+    ]
+  },
+  {
+    "id": "model-requirements-narrative",
+    "type": "Model",
+    "name": "Requirements narrative",
+    "description": "The interaction that generates one narrative per reader role from the model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "order": 11,
+      "sliceTitle": "The reviewer understands the system at minimum cost"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-open-question-management",
+    "type": "Model",
+    "name": "Open question management",
+    "description": "The interaction that keeps one list of unresolved questions and makes recommendations name the ones they depend on.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 8 \u2014 Unresolved uncertainty is visible, not hidden"
+      ],
+      "order": 12,
+      "sliceTitle": "Unresolved uncertainty stays visible"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ]
+  },
+  {
+    "id": "model-skill-validation",
+    "type": "Model",
+    "name": "Skill validation",
+    "description": "The interaction that discovers skills, verifies them, and only then runs a significant operation.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 9 \u2014 Required skills are verified before significant operations"
+      ],
+      "order": 13,
+      "sliceTitle": "Required skills are verified first"
+    },
+    "status": "implemented",
+    "interaction": [
+      "system-system"
+    ],
+    "steps": [
+      {
+        "from": "system-ai-harness",
+        "to": "system-skills-registry",
+        "message": "discover skills"
+      },
+      {
+        "from": "system-skills-registry",
+        "to": "system-ai-harness",
+        "message": "verification result",
+        "kind": "return"
+      }
+    ]
+  },
+  {
+    "id": "model-interpreter-contract",
+    "type": "Model",
+    "name": "Interpreter contract",
+    "description": "The interaction that executes within layer roles and fails a solution only on a real boundary violation.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "order": 14,
+      "sliceTitle": "Constraints bound solutions without restricting them",
+      "gaps": "The boundary check is implemented. There is no full execution runtime, and the vector threshold in OQ-001 is unresolved."
+    },
+    "status": "partial",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-conformance-check",
+    "type": "Model",
+    "name": "Conformance check",
+    "description": "The interaction that will check each requirement against its acceptance. Not built yet.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "order": 15,
+      "sliceTitle": "Conformance per requirement"
+    },
+    "status": "planned",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-verification-role",
+    "type": "Model",
+    "name": "Verification role",
+    "description": "The interaction that will adopt a development or solution-test role from the project manifest. Not built yet.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "order": 16,
+      "sliceTitle": "Verification role"
+    },
+    "status": "planned",
+    "interaction": [
+      "human-system"
+    ]
+  },
+  {
+    "id": "model-canonical-test-definition",
+    "type": "Model",
+    "name": "Canonical test definition",
+    "description": "The interaction that will keep tests declarative and free of a runner's name. Not built yet.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "order": 17,
+      "sliceTitle": "Canonical tests"
+    },
+    "status": "planned",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "model-execution-adapter",
+    "type": "Model",
+    "name": "Execution adapter",
+    "description": "The interaction that will resolve a canonical test to the same actions every run, without inferring a path. Not built yet.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "order": 18,
+      "sliceTitle": "Execution adapter"
+    },
+    "status": "planned",
+    "interaction": [
+      "system-system"
+    ]
+  },
+  {
+    "id": "requirement-versioned",
+    "type": "Requirement",
+    "name": "Releases are versioned",
+    "description": "Every release carries a version that matches its folder name.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "delivery",
+      "acceptance": "Given a release folder named v0.1.0, when its manifest is read, then version is 0.1.0."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-change-docs",
+    "type": "Requirement",
+    "name": "Releases include change documentation",
+    "description": "Every release explains what changed.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "governance",
+      "acceptance": "Given a release folder, when it is checked, then RELEASE.md and CHANGELOG.md exist."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-reproducible",
+    "type": "Requirement",
+    "name": "Releases are reproducible",
+    "description": "Rebuilding a release from source produces the same kit bytes.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "delivery",
+      "acceptance": "Given the kit file list, when the kit is rebuilt, then every file matches and the digest matches."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-self-contained",
+    "type": "Requirement",
+    "name": "Releases are self-contained",
+    "description": "A release folder copied on its own does not point outside itself.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "architectural",
+      "acceptance": "Given the release folder, when its text files are scanned, then none contain a network URL, an absolute home path, or a link that leaves the folder."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-repository-structure",
+    "type": "Requirement",
+    "name": "Repository has the required structure",
+    "description": "The repository has the directories and the root manifest the framework requires.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "architectural",
+      "acceptance": "Given the repository, when validate-framework.py runs, then src, releases, meta/iomr-model, changelog, docs, and iomr-manifest.json exist."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-validation-instructions",
+    "type": "Requirement",
+    "name": "Validation instructions ship",
+    "description": "Each release tells a consumer how to validate it.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "governance",
+      "acceptance": "Given a release folder, when it is checked, then VALIDATION_CHECKLIST.md exists."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-consistency-validation",
+    "type": "Requirement",
+    "name": "Consistency validation passes",
+    "description": "The framework checker reports the tree valid, with zero errors.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "governance",
+      "acceptance": "Given a clean tree, when validate-framework.py runs, then it prints VALID and errors: 0."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-refines-discipline-enforced",
+    "type": "Requirement",
+    "name": "Refines discipline",
+    "description": "A breakdown stays the same kind of record, stays two levels deep at most, and is not used as a trade-off.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
+      ],
+      "category": "governance",
+      "acceptance": "Given a same-type refines chain deeper than 2, or a vector outcome used as a refines endpoint, when validate runs, then a refines.discipline finding is raised."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-upgrade-instructions",
+    "type": "Requirement",
+    "name": "Upgrade instructions",
+    "description": "Every release after the first explains how to move off the previous one.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 2 \u2014 Upgrades are predictable"
+      ],
+      "category": "delivery",
+      "acceptance": "Given a second release folder v0.2.0 after v0.1.0, when it is checked, then UPGRADE_FROM_v0.1.0.md exists. The first release does not need one."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-release-eligibility",
+    "type": "Requirement",
+    "name": "Release eligibility rule",
+    "description": "A release is cut only when a project-consumable asset changed. Internal-only edits are recorded as framework work, not a release.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "category": "governance",
+      "acceptance": "Given a change set of only meta/ and changelog/ paths, when eligibility is classified, then the result is no release. Given a change under src/schemas/, the result is release."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-consumer-impact-test",
+    "type": "Requirement",
+    "name": "Consumer impact test",
+    "description": "Before a release, answer whether a project on the previous release would behave differently. If yes, record the difference.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "category": "governance",
+      "acceptance": "Given a release, when RELEASE.md is read, then Consumer impact is YES or NO. YES includes a behavioural difference of at least 20 characters."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-lifecycle-four-steps",
+    "type": "Requirement",
+    "name": "Four-step lifecycle",
+    "description": "A release candidate is generated from the model, tested, and shipped only on a documented human green light.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "category": "governance",
+      "acceptance": "Given RELEASE.md, when it is read, then the four lifecycle markers are present, including a Green light line."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-model-is-source-of-truth",
+    "type": "Requirement",
+    "name": "The model is the source of truth",
+    "description": "Generated documents are derived from the model. When they disagree, the model wins and the document is regenerated.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "category": "governance",
+      "acceptance": "Given TRACEABILITY.md and the role narratives, when export runs again, then the bytes match. Hand edits fail validation."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-ai-test-before-release",
+    "type": "Requirement",
+    "name": "AI-test before release",
+    "description": "Strict validation, framework self-validation, and the engine tests pass before a candidate is offered for green light.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
+      ],
+      "category": "delivery",
+      "acceptance": "Given RELEASE.md, when it is read, then it records imk validate --strict and validate-framework.py."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-version-discovery",
+    "type": "Requirement",
+    "name": "Version information is machine-discoverable",
+    "description": "A tool can read the project file and learn the framework version, where the model lives, and whether an upgrade applies.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 4 \u2014 AI tools can consume the assets"
+      ],
+      "category": "functional",
+      "acceptance": "Given src/examples/project-manifest.json, when it is checked against project-manifest.schema.json, then iomrVersion, modelLocation, and upgradeEligibility are present and valid."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-capture-why",
+    "type": "Requirement",
+    "name": "Capture why, not only what",
+    "description": "The model records why the work exists, not only the rules, and every rule traces back to that why.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "category": "governance",
+      "acceptance": "Given the model, when validate runs, then there is at least 1 Intent and 1 Outcome, and every Requirement reaches an Intent."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-context-persistent-inspectable",
+    "type": "Requirement",
+    "name": "Context is persistent and inspectable",
+    "description": "A new person or a new session can reconstruct the contextual network from the repository alone.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "category": "non-functional",
+      "acceptance": "Given every evidence pointer, when it is opened, then the file is inside the repository and the anchor is present.",
+      "businessConsequence": "A new person can reconstruct the reasons from the project alone, without asking someone who has left."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-raise-gap-challenge",
+    "type": "Requirement",
+    "name": "Raise a gap challenge",
+    "description": "A suspected missing interaction becomes a challenge with an observation, a concern, possibilities, and a question. It is not added as a fact.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "category": "governance",
+      "acceptance": "Given a gap challenge, when it is formatted, then it contains POTENTIAL MODEL GAP and the four labels, and it writes no model file."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-model-holds-test-preconditions",
+    "type": "Requirement",
+    "name": "Test context lives in the model first",
+    "description": "Preconditions, the trigger, and the expected result live in the model before any test is written.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "category": "governance",
+      "acceptance": "Given a future test record, when it is derived, then its precondition, trigger, and expected result already exist on the model. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-support-human-authored-mode",
+    "type": "Requirement",
+    "name": "Support human-authored mode",
+    "description": "A person writes the chain. The assistant does not invent records, and requirements stay hard boundaries.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 5 \u2014 The model captures *why*, and keeps it inspectable"
+      ],
+      "category": "functional",
+      "acceptance": "Given the integrated model, when it is checked, then no record has basis inferred."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-support-ai-inferred-mode",
+    "type": "Requirement",
+    "name": "Support AI-inferred mode",
+    "description": "The assistant may propose a slice from a high-level request. The slice is marked proposed and inferred, and nothing is built until a person approves it.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 6 \u2014 The AI's understanding is inspectable before implementation"
+      ],
+      "category": "functional",
+      "acceptance": "Given a new slice record, when it is created, then status is proposed, basis is inferred, and metadata.slice is set. Slice files stay out of the integrated model until integrate runs."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-expose-ai-understanding",
+    "type": "Requirement",
+    "name": "Expose the AI understanding",
+    "description": "Every inferred record states what was inferred, so a person can catch a wrong assumption before implementation.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 6 \u2014 The AI's understanding is inspectable before implementation"
+      ],
+      "category": "governance",
+      "acceptance": "Given an inferred record, when it is checked, then metadata.inference is non-empty."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-emergent-design-surfaced",
+    "type": "Requirement",
+    "name": "Surface material design choices",
+    "description": "A design choice no requirement dictated, which would shape what a person sees, becomes a proposed decision. Incidental choices stay free.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 6 \u2014 The AI's understanding is inspectable before implementation"
+      ],
+      "category": "governance",
+      "acceptance": "Given a material undesigned choice, when it is surfaced, then a Decision with status proposed exists. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-narrative-per-role",
+    "type": "Requirement",
+    "name": "One narrative per role",
+    "description": "There is a separate narrative for a developer, a tester, and a power user. Each names the role, what that reader knows, and the next step.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "category": "functional",
+      "acceptance": "Given export narrative for the three roles, when the headers are read, then each names its role and a next step."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-narrative-role-scope",
+    "type": "Requirement",
+    "name": "Scope requirements to the role",
+    "description": "A developer and a tester see every requirement. A power user sees the business-facing ones, and a technical requirement only as the consequence they own.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "category": "functional",
+      "acceptance": "Given the power-user narrative, when it is scanned, then a delivery-only requirement such as versioning is absent and the word SemVer does not appear."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-narrative-human-constraint-budget",
+    "type": "Requirement",
+    "name": "Human-constraint budget",
+    "description": "Each narrative records how long it takes to read and how hard it is to hold, and it does not hide a relevant risk to stay short.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "category": "non-functional",
+      "acceptance": "Given a generated narrative, when the header is read, then it records minutes and a cognitive load of H, M, or L.",
+      "businessConsequence": "The write-up tells you how long it takes to read and does not hide a risk to stay short."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-narrative-traceable",
+    "type": "Requirement",
+    "name": "Narrative claims trace to records",
+    "description": "Regenerating from the model reproduces the narrative, and every requirement the developer narrative names exists in the model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "category": "governance",
+      "acceptance": "Given the developer narrative, when requirement ids are collected, then each one exists in the model and none of the model's requirements are missing."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-narrative-flag-manual-eval",
+    "type": "Requirement",
+    "name": "Flag human judgement",
+    "description": "Where a person rather than a machine must judge, the narrative shows the judgement marker.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 7 \u2014 The reviewer understands the system at minimum cost"
+      ],
+      "category": "governance",
+      "acceptance": "Given each role narrative, when it is scanned, then the judgement marker is present."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-open-questions-central",
+    "type": "Requirement",
+    "name": "One open-question list",
+    "description": "meta/open-questions.md is the only independent list. Anything else refers to a question by id.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 8 \u2014 Unresolved uncertainty is visible, not hidden"
+      ],
+      "category": "governance",
+      "acceptance": "Given the repository, when files named open-questions*.md are listed, then the only one is meta/open-questions.md."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-open-question-fields",
+    "type": "Requirement",
+    "name": "Open-question fields",
+    "description": "Each question has eleven fields, and the risk level is one of Critical, High, Medium, Low, or Informational.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 8 \u2014 Unresolved uncertainty is visible, not hidden"
+      ],
+      "category": "governance",
+      "acceptance": "Given meta/open-questions.md, when it is parsed, then each question has the eleven named fields and a risk level from that set."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-open-question-influence",
+    "type": "Requirement",
+    "name": "Questions influence recommendations",
+    "description": "A recommendation that depends on an unresolved High or Critical question names it, names the risk, and says results may change once it is resolved.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 8 \u2014 Unresolved uncertainty is visible, not hidden"
+      ],
+      "category": "governance",
+      "acceptance": "Given docs/recommendations.md and OQ-001 at High, when the recommendation depends on it, then the text names OQ-001, High, and says results may change."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-skills-registry",
+    "type": "Requirement",
+    "name": "Skills registry",
+    "description": "meta/required-skills.md lists each skill with five fields: id, name, purpose, criticality, and verification.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 9 \u2014 Required skills are verified before significant operations"
+      ],
+      "category": "governance",
+      "acceptance": "Given meta/required-skills.md, when it is parsed, then every skill has those five fields and a known criticality."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-verify-skills-before-ops",
+    "type": "Requirement",
+    "name": "Verify skills before significant operations",
+    "description": "The harness discovers skills, verifies them, and only then runs the operation. A missing critical skill stops the run and names the skill, the impact, and the action.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 9 \u2014 Required skills are verified before significant operations"
+      ],
+      "category": "governance",
+      "acceptance": "Given a registry whose critical skill file is missing, when validate runs, then it exits with a FAIL report and does not continue."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-interpreter-honours-layers",
+    "type": "Requirement",
+    "name": "Execution honours layer roles",
+    "description": "Intent dominates, outcomes are what you optimise, models are the logical shape, and requirements are hard boundaries. The engine's private method is not prescribed.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "category": "functional",
+      "acceptance": "Given the layer-role contract, when a solution is assessed, then only requirement boundaries can fail it."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-no-expressiveness-penalty",
+    "type": "Requirement",
+    "name": "No penalty for unfamiliarity",
+    "description": "Only a real boundary violation may fail a solution. Failing a new approach that still follows the rules is a defect.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "category": "governance",
+      "acceptance": "Given a solution whose only novelty is an unknown field, when it is assessed against a boundary on a different field, then it passes. Given the forbidden value, it fails."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-conformance-per-requirement",
+    "type": "Requirement",
+    "name": "Conformance per requirement",
+    "description": "Each requirement that constrains a model is checked against its acceptance. A machine checks what it can. A person is flagged for the rest.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 10 \u2014 The constraint language bounds solutions without restricting them"
+      ],
+      "category": "delivery",
+      "acceptance": "Given a future conformance run, when it finishes, then each in-scope requirement is passed, failed, or flagged for a person. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-declare-verification-role",
+    "type": "Requirement",
+    "name": "Declare a verification role",
+    "description": "A project may say whether it is for development or for solution testing. If it says nothing, it is development.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given a manifest with no role, when it is read, then the role is development. Scope switching is not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-unit-scope-single-model",
+    "type": "Requirement",
+    "name": "Development role checks one model",
+    "description": "In development, a check covers only the requirements that constrain the one model an artefact realises.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "functional",
+      "acceptance": "Given the development role and one artefact, when verification runs, then only that model's requirements are in scope. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-solution-scope-trace-chain",
+    "type": "Requirement",
+    "name": "Solution-test role checks the chain",
+    "description": "In solution testing, a check walks the model up to the intent, against a read-only pinned snapshot.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "functional",
+      "acceptance": "Given the solution-test role, when verification runs, then the pinned snapshot is read-only and the chain is in scope. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-repin-triage",
+    "type": "Requirement",
+    "name": "Re-pin triage",
+    "description": "Moving the pinned model forward marks each affected chain unchanged, deliberately changed, or broken. A broken chain stops the move. A deliberate change must be confirmed first.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "governance",
+      "acceptance": "Given a pin diff, when it is classified, then a regressed chain blocks the pin. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-solution-coverage",
+    "type": "Requirement",
+    "name": "Coverage against the model",
+    "description": "Every in-scope outcome has at least one test, and every machine-checkable requirement has at least one test. Gaps are named as model elements, not as lines of code.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "governance",
+      "acceptance": "Given a solution-test report, when coverage is read, then gaps name outcome or requirement ids. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-cross-system-contract",
+    "type": "Requirement",
+    "name": "Cross-system contracts are referenced",
+    "description": "A contract is owned by the system that provides it. A consumer points at the id and version. The consumer does not copy the contract.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "integration",
+      "acceptance": "Given a consumer model, when a foreign contract is needed, then the reference is an id and a version, not a copy. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-test-definition-framework-agnostic",
+    "type": "Requirement",
+    "name": "Tests are framework-agnostic",
+    "description": "A test is a canonical definition in model terms. The authoritative model does not name a runner.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given the authoritative model, when it is scanned, then no runner product name is required. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-ctd-declarative",
+    "type": "Requirement",
+    "name": "Canonical tests are declarative",
+    "description": "A canonical test states the precondition, the trigger, and the expected result. It does not state selectors or click sequences.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given a canonical test, when it is read, then precondition, trigger, and expected are present and no selector is required. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-semantic-locator-contract",
+    "type": "Requirement",
+    "name": "Stable semantic locators",
+    "description": "An element is addressed by a stable test id or an accessible name, not by a stylesheet path or a screen position.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given a locator, when it is recorded, then it is a test id or an accessible name. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-canonical-test-result",
+    "type": "Requirement",
+    "name": "Canonical results",
+    "description": "A result links to the acceptance it evidenced, the snapshot version, and the run. The model's result is not a runner's private report.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "audit",
+      "acceptance": "Given a result record, when it is read, then it names the acceptance, the snapshot, and the run. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-execution-adapter-deterministic",
+    "type": "Requirement",
+    "name": "Deterministic adapter resolution",
+    "description": "The same canonical test yields the same actions on every run. Inferring a path at run time is forbidden.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given one canonical test and level-0 recipes, when it runs twice, then the actions match. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-provisioning-separate",
+    "type": "Requirement",
+    "name": "Provisioning is separate from execution",
+    "description": "Setup and teardown are a different adapter, with broader access. The execution adapter has only what a user has. The model names capabilities, not adapter products.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "architectural",
+      "acceptance": "Given the model, when adapters are described, then provisioning and execution are different capabilities. Not enforced in 0.1.0."
+    },
+    "status": "planned"
+  },
+  {
+    "id": "requirement-secrets-referenced-not-embedded",
+    "type": "Requirement",
+    "name": "Secrets are referenced, never embedded",
+    "description": "No credential appears in the model, the tests, the results, or the repository. The project names the secret. An external store resolves it at run time.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 11 \u2014 A repo verifies against the authoritative model without forking the truth"
+      ],
+      "category": "security",
+      "acceptance": "Given the repository, when a future secret scan runs, then only references such as secret names appear. Not enforced in 0.1.0.",
+      "businessConsequence": "A credential never appears in the project a person can read. The project names the secret. It does not contain it."
+    },
+    "status": "planned"
+  }
+]

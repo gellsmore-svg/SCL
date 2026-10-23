@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scl"
+version = "0.1.0"
+description = "SCL is an IOMR framework: one authoritative model, and the constraints an implementation builds within."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [{name = "gellsmore-svg"}]
+
+[project.scripts]
+scl = "scl.cli:main"
+imk = "scl.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src/tooling"]

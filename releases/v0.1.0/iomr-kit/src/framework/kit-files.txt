@@ -1,0 +1,8 @@
+meta/iomr-model/metamodel.json
+src/examples/project-manifest.json
+src/framework/kit-files.txt
+src/prompts/gap-challenge.md
+src/prompts/mode-1.md
+src/prompts/mode-2.md
+src/schemas/project-manifest.schema.json
+src/templates/project-manifest.json

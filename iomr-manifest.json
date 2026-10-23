@@ -1,0 +1,7 @@
+{
+  "name": "SCL",
+  "version": "0.1.0",
+  "metamodel": "iomr-evolved",
+  "metamodelVersion": "2.0.0",
+  "modelLocation": "meta/iomr-model"
+}

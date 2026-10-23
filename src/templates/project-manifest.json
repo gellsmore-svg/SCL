@@ -1,5 +1,5 @@
 {
-  "iomrVersion": "0.1.0",
+  "iomrVersion": "0.2.0",
   "modelLocation": "meta/iomr-model",
-  "upgradeEligibility": "0.1.0"
+  "upgradeEligibility": "0.2.0"
 }

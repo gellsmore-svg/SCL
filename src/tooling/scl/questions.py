@@ -64,31 +64,32 @@ def question_findings(root: Path) -> list[Finding]:
     return findings
 
 
-def influence_findings(text: str, questions: list[dict[str, str]]) -> list[Finding]:
-    """A recommendation that depends on an open High/Critical question must name it."""
-    if "recommendation" not in text.lower() or "depend" not in text.lower():
-        return []
-    hot = [
+def _unresolved_hot(questions: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
         question
         for question in questions
         if question.get("Risk Level") in HOT and question.get("Status", "").lower() not in {"resolved", "closed"}
     ]
-    named = [question for question in hot if question.get("ID") and question["ID"] in text]
-    if not named:
-        return [
-            Finding(
-                "questions.influence",
-                "recommendation depends on an unresolved High/Critical question but does not name it",
-            )
-        ]
+
+
+def influence_findings(text: str, questions: list[dict[str, str]]) -> list[Finding]:
+    """A recommendation that names an unresolved High/Critical question must show the risk.
+
+    The word "depend" is not itself a dependency. Resolved questions do not escalate.
+    """
+    if "recommendation" not in text.lower():
+        return []
     findings = []
-    for question in named:
-        if question["Risk Level"] not in text or "may change" not in text.lower():
+    for question in _unresolved_hot(questions):
+        record_id = question.get("ID") or ""
+        if not record_id or record_id not in text:
+            continue
+        if question.get("Risk Level") not in text or "may change" not in text.lower():
             findings.append(
                 Finding(
                     "questions.influence",
                     "recommendation must name the risk and state that results may change once resolved",
-                    question.get("ID", ""),
+                    record_id,
                 )
             )
     return findings

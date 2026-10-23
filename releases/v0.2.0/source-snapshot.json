@@ -1,0 +1,14 @@
+{
+  "files": {
+    "meta/iomr-model/metamodel.json": "57ac4deaccb9927cb60156d6e75bbe98d60062840dd3ff453a0769a4d40d082e",
+    "src/examples/consumer-model.json": "d38327ebe75e3fe44ac68e1eee884ff92e0271c730e22e36240fc7060fb227ac",
+    "src/examples/project-manifest.json": "8477219fbc030f7af546926eb62320e0b7208ade665d7b42599b24b127bf51f9",
+    "src/framework/consume.py": "4c36b651becfd62331ffecdf9ebc0af379eb31fc7f964a91893fd79a8b01c19f",
+    "src/framework/kit-files.txt": "76aaa6c60660b0725a5b2a57242f45ac15a7bee8ea873027ca2d8b2278c695fd",
+    "src/prompts/gap-challenge.md": "ad70b66838635fa89d1dadfd8abc55458d9ae3e84c481e119a7f315cd6a79bf0",
+    "src/prompts/mode-1.md": "855e7319d69ea440a079f89b244b71e50f13fdf8773958f73b167ae766282321",
+    "src/prompts/mode-2.md": "2cfe0916c7f208e040825f89642621ea8ff96dc63a5ec3a5553a4930b563a6d0",
+    "src/schemas/project-manifest.schema.json": "5a0cd8d9399acd7cea833a1c3cfb089127b7d12848aa7bd9f126590293bd54a9",
+    "src/templates/project-manifest.json": "8477219fbc030f7af546926eb62320e0b7208ade665d7b42599b24b127bf51f9"
+  }
+}

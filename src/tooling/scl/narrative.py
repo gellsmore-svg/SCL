@@ -74,9 +74,33 @@ def render_role(loaded: Loaded, role: str) -> tuple[str, str | None]:
         ids = [rel["to"] for rel in loaded.relationships if rel["type"] == "serves" and rel["from"] == model_id]
         return [by_id[item] for item in ids if item in by_id]
 
+    def specifies_model(requirement_id: str) -> bool:
+        return any(
+            rel["type"] == "specifies" and rel["from"] == requirement_id for rel in loaded.relationships
+        )
+
     def specifies(model_id: str) -> list[dict]:
         ids = [rel["from"] for rel in loaded.relationships if rel["type"] == "specifies" and rel["to"] == model_id]
-        return [by_id[item] for item in ids if item in by_id]
+        chosen = [by_id[item] for item in ids if item in by_id and by_id[item]["type"] == "Requirement"]
+        seen = {item["id"] for item in chosen}
+        frontier = list(seen)
+        while frontier:
+            current = frontier.pop()
+            for rel in loaded.relationships:
+                if rel["type"] != "refines" or rel["to"] != current:
+                    continue
+                child_id = rel["from"]
+                child = by_id.get(child_id)
+                if child is None or child.get("type") != "Requirement" or child_id in seen:
+                    continue
+                if specifies_model(child_id):
+                    continue
+                if not _included(child, role):
+                    continue
+                chosen.append(child)
+                seen.add(child_id)
+                frontier.append(child_id)
+        return chosen
 
     main_slices: list[tuple[dict, list[dict], list[dict]]] = []
     appendix_slices: list[tuple[dict, list[dict], list[dict]]] = []
@@ -106,6 +130,13 @@ def render_role(loaded: Loaded, role: str) -> tuple[str, str | None]:
             lines.append("")
         lines.append(model["description"])
         lines.append("")
+        status = model.get("status") or "unspecified"
+        gaps = str(metadata.get("gaps") or "").strip()
+        if status in {"partial", "planned"} or gaps:
+            lines.append(f"Model status: {status}.")
+            if gaps:
+                lines.append(f"Known gap: {gaps}")
+            lines.append("")
         for req in reqs:
             req_meta = req.get("metadata") or {}
             if role == "power-user" and req_meta.get("businessConsequence"):
@@ -169,18 +200,29 @@ def render_role(loaded: Loaded, role: str) -> tuple[str, str | None]:
     )
     appendix = None
     if appendix_slices:
+        described = []
+        for model, _served, _reqs in appendix_slices:
+            status = model.get("status") or "unspecified"
+            gaps = str((model.get("metadata") or {}).get("gaps") or "").strip()
+            line = f"`{model['id']}` is {status}"
+            if gaps:
+                line += f". Known gap: {gaps}"
+            described.append(line)
         appendix = document(
             appendix_slices,
             f"SCL for a {role} — appendix",
-            "Read this when you are building the planned slice. It is a separate touchpoint.",
+            "These slices are here because each one has more than 8 requirements. "
+            + " ".join(described)
+            + ".",
         )
         pointer = [
             "",
-            "## Planned slice, held in a separate touchpoint",
+            "## Longer slices",
             "",
-            "The planned verification and test-adapter constraints are in the appendix. "
-            "That document is useful on its own when you start that build. "
-            "The judgements for that slice stay listed above.",
+            "These slices are in the appendix so this document stays within the budget. "
+            "Each one keeps its own status and gaps: "
+            + "; ".join(described)
+            + ".",
             "",
         ]
         main = main.rstrip() + "\n" + "\n".join(pointer)

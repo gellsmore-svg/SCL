@@ -40,6 +40,8 @@ CHAIN = ("Intent", "Outcome", "Model", "Requirement")
 UP = {"delivers", "serves", "specifies", "refines"}
 BASIS = {"stated", "derived", "inferred"}
 STATUS = {"implemented", "partial", "planned", "proposed", "retired"}
+INTERACTION = {"human-system", "system-system"}
+SUPPORTED_METAMODEL = ("iomr-evolved", "2.0.0")
 
 
 @dataclass
@@ -52,7 +54,11 @@ class Loaded:
 
     @property
     def by_id(self) -> dict[str, dict]:
-        return {node["id"]: node for node in self.nodes}
+        found: dict[str, dict] = {}
+        for node in self.nodes:
+            if isinstance(node, dict) and isinstance(node.get("id"), str) and node["id"]:
+                found[node["id"]] = node
+        return found
 
 
 def find_root(start: Path | None = None) -> Path:
@@ -115,17 +121,65 @@ def _pairs(rule, from_type: str, to_type: str) -> bool:
     return False
 
 
+def contained_path(root: Path, relative: str) -> Path | None:
+    """Resolve a repository-relative path. Symlinks and `..` may not leave the root."""
+    if not isinstance(relative, str) or not relative.strip():
+        return None
+    if relative.startswith(("/", "\\")):
+        return None
+    root_resolved = root.resolve()
+    candidate = (root_resolved / relative).resolve()
+    try:
+        candidate.relative_to(root_resolved)
+    except ValueError:
+        return None
+    return candidate
+
+
+def metamodel_findings(root: Path) -> list[Finding]:
+    """The project must declare the one supported metamodel, and the file must match."""
+    imk_path = root / "imk.json"
+    meta_path = root / "meta" / "iomr-model" / "metamodel.json"
+    if not imk_path.is_file() or not meta_path.is_file():
+        return [Finding("metamodel.identity", "imk.json or metamodel.json is missing")]
+    try:
+        config = _read_json(imk_path)
+        meta = _read_json(meta_path)
+    except json.JSONDecodeError:
+        return [Finding("metamodel.identity", "metamodel configuration is not valid JSON")]
+    if not isinstance(config, dict) or not isinstance(meta, dict):
+        return [Finding("metamodel.identity", "metamodel configuration must be a JSON object")]
+    declared = (config.get("metamodel"), config.get("metamodelVersion"))
+    actual = (meta.get("name"), meta.get("version"))
+    findings: list[Finding] = []
+    if declared != actual:
+        findings.append(
+            Finding(
+                "metamodel.identity",
+                f"declared {declared[0]} {declared[1]} does not match metamodel {actual[0]} {actual[1]}",
+            )
+        )
+    if actual != SUPPORTED_METAMODEL:
+        findings.append(Finding("metamodel.identity", "only iomr-evolved 2.0.0 is supported"))
+    return findings
+
+
 def _evidence_finding(root: Path, sources: dict[str, dict], evidence: str, record_id: str) -> Finding | None:
-    if ":" not in evidence:
+    if not isinstance(evidence, str) or ":" not in evidence:
         return Finding("ref.evidence", "evidence must be alias:path#anchor", record_id)
     alias, rest = evidence.split(":", 1)
     source = sources.get(alias)
     if source is None:
         return Finding("ref.evidence", f"unknown source alias {alias}", record_id)
+    source_path = source.get("path")
+    if not isinstance(source_path, str) or contained_path(root, source_path) is None:
+        return Finding("context.external", "declared source path escapes the repository", record_id)
     path_part, sep, anchor = rest.partition("#")
-    if path_part != source["path"]:
-        return Finding("ref.evidence", f"path does not match declared source {source['path']}", record_id)
-    file_path = root / path_part
+    if path_part != source_path:
+        return Finding("ref.evidence", f"path does not match declared source {source_path}", record_id)
+    file_path = contained_path(root, path_part)
+    if file_path is None:
+        return Finding("context.external", "evidence path escapes the repository", record_id)
     if not file_path.is_file():
         return Finding("ref.evidence", f"cited file does not exist: {path_part}", record_id)
     if not sep or not anchor:
@@ -163,22 +217,52 @@ def _reaches_intent(start: str, by_id: dict[str, dict], outgoing: dict[str, list
     return False
 
 
+def _metadata(node: dict, findings: list[Finding], record_id: str) -> dict:
+    metadata = node.get("metadata")
+    if metadata is None:
+        return {}
+    if not isinstance(metadata, dict):
+        findings.append(Finding("record.shape", "metadata must be an object", record_id))
+        return {}
+    return metadata
+
+
 def structural_findings(loaded: Loaded) -> list[Finding]:
     findings: list[Finding] = []
+    findings.extend(metamodel_findings(loaded.root))
     by_id = loaded.by_id
-    sources = {item["alias"]: item for item in loaded.sources}
+    sources = {}
+    for item in loaded.sources:
+        if isinstance(item, dict) and isinstance(item.get("alias"), str):
+            sources[item["alias"]] = item
 
-    if len(by_id) != len(loaded.nodes):
+    ids = [node.get("id") for node in loaded.nodes if isinstance(node, dict) and isinstance(node.get("id"), str)]
+    if len(ids) != len(set(ids)):
         findings.append(Finding("record.id-prefix", "duplicate record ids in the model"))
 
+    usable: list[dict] = []
     for node in loaded.nodes:
+        if not isinstance(node, dict):
+            findings.append(Finding("record.shape", "record is not an object"))
+            continue
+        record_id = node.get("id")
+        if not isinstance(record_id, str) or not record_id.strip():
+            findings.append(Finding("record.shape", "record is missing id"))
+            continue
+        usable.append(node)
+
+    for node in usable:
         prefix = TYPE_PREFIX.get(node.get("type"))
         record_id = str(node.get("id", ""))
         if prefix is None:
             findings.append(Finding("record.id-prefix", f"unknown type {node.get('type')}", record_id))
         elif not record_id.startswith(prefix):
             findings.append(Finding("record.id-prefix", f"id must start with {prefix}", record_id))
-        metadata = node.get("metadata") or {}
+        metadata = _metadata(node, findings, record_id)
+        if node.get("type") == "Requirement":
+            acceptance = metadata.get("acceptance")
+            if not isinstance(acceptance, str) or not acceptance.strip():
+                findings.append(Finding("record.acceptance", "Requirement requires metadata.acceptance", record_id))
         basis = metadata.get("basis")
         if basis not in BASIS:
             findings.append(Finding("status.discipline", "metadata.basis must be stated, derived, or inferred", record_id))
@@ -191,7 +275,11 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
             findings.append(Finding("status.discipline", "implemented records require evidence", record_id))
         if loaded.sources and node.get("type") in CHAIN and not metadata.get("evidence"):
             findings.append(Finding("ref.unevidenced", "chain record has no evidence", record_id))
-        for item in metadata.get("evidence") or []:
+        evidence = metadata.get("evidence") or []
+        if not isinstance(evidence, list):
+            findings.append(Finding("record.shape", "metadata.evidence must be a list", record_id))
+            evidence = []
+        for item in evidence:
             found = _evidence_finding(loaded.root, sources, item, record_id)
             if found:
                 findings.append(found)
@@ -202,6 +290,9 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
     incoming_involves: dict[str, list[str]] = {}
     refines: list[dict] = []
     for rel in loaded.relationships:
+        if not isinstance(rel, dict):
+            findings.append(Finding("record.shape", "relationship is not an object"))
+            continue
         rel_id = str(rel.get("id", ""))
         kind = rel.get("type")
         source_id = rel.get("from")
@@ -234,15 +325,16 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
         if kind == "refines":
             refines.append(rel)
 
-    for node in loaded.nodes:
+    for node in usable:
         if node.get("type") in ("Outcome", "Model", "Requirement"):
             if not _reaches_intent(node["id"], by_id, outgoing):
                 findings.append(Finding("trace.reach-intent", "record does not trace up to an Intent", node["id"]))
 
-    delivered = {rel["to"] for rel in loaded.relationships if rel.get("type") == "delivers"}
-    served = {rel["to"] for rel in loaded.relationships if rel.get("type") == "serves"}
-    specified = {rel["to"] for rel in loaded.relationships if rel.get("type") == "specifies"}
-    for node in loaded.nodes:
+    good_rels = [rel for rel in loaded.relationships if isinstance(rel, dict)]
+    delivered = {rel["to"] for rel in good_rels if rel.get("type") == "delivers"}
+    served = {rel["to"] for rel in good_rels if rel.get("type") == "serves"}
+    specified = {rel["to"] for rel in good_rels if rel.get("type") == "specifies"}
+    for node in usable:
         kind = node.get("type")
         if kind == "Intent" and node["id"] not in delivered:
             findings.append(Finding("trace.coverage", "Intent has no Outcome", node["id"]))
@@ -251,22 +343,29 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
         if kind == "Model" and node["id"] not in specified:
             findings.append(Finding("trace.coverage", "Model has no Requirement", node["id"]))
 
-    parent = {rel["from"]: rel["to"] for rel in refines}
+    parents: dict[str, list[str]] = {}
+    for rel in refines:
+        parents.setdefault(rel["from"], []).append(rel["to"])
     vector_ids = {
         node["id"]
-        for node in loaded.nodes
-        if node.get("type") == "Outcome" and (node.get("metadata") or {}).get("measurement") == "vector"
+        for node in usable
+        if node.get("type") == "Outcome" and _metadata(node, [], node["id"]).get("measurement") == "vector"
     }
 
     def depth(record_id: str, seen: set[str]) -> int:
-        if record_id not in parent:
+        chain = parents.get(record_id) or []
+        if not chain:
             return 1
         if record_id in seen:
             return 99
         seen.add(record_id)
-        return 1 + depth(parent[record_id], seen)
+        deepest = 1
+        for parent_id in chain:
+            deepest = max(deepest, 1 + depth(parent_id, seen))
+        seen.remove(record_id)
+        return deepest
 
-    for record_id in parent:
+    for record_id in parents:
         if depth(record_id, set()) > 2:
             findings.append(Finding("refines.discipline", "refines nesting is deeper than 2 levels", record_id))
     for rel in refines:
@@ -279,11 +378,27 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
                 )
             )
 
-    rels = loaded.relationships
-    for node in loaded.nodes:
+    rels = good_rels
+    for node in usable:
         if node.get("type") != "Model":
             continue
-        interaction = set(node.get("interaction") or [])
+        raw_interaction = node.get("interaction")
+        if raw_interaction is None:
+            interaction: set[str] = set()
+        elif not isinstance(raw_interaction, list) or not all(isinstance(item, str) for item in raw_interaction):
+            findings.append(Finding("model.participants", "interaction must be a list of known values", node["id"]))
+            interaction = set()
+        else:
+            interaction = set(raw_interaction)
+            unknown = sorted(interaction - INTERACTION)
+            if unknown:
+                findings.append(
+                    Finding(
+                        "model.participants",
+                        "unsupported interaction " + ", ".join(unknown),
+                        node["id"],
+                    )
+                )
         involved = []
         for rel in rels:
             if rel.get("type") == "involves" and rel.get("from") == node["id"] and rel.get("to") in by_id:
@@ -297,7 +412,14 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
             findings.append(Finding("model.participants", "system-system needs at least two Systems", node["id"]))
         if not interaction:
             findings.append(Finding("model.participants", "Model is missing interaction", node["id"]))
-        for index, step in enumerate(node.get("steps") or []):
+        steps = node.get("steps") or []
+        if not isinstance(steps, list):
+            findings.append(Finding("record.shape", "steps must be a list", node["id"]))
+            steps = []
+        for index, step in enumerate(steps):
+            if not isinstance(step, dict):
+                findings.append(Finding("record.shape", f"step {index} is not an object", node["id"]))
+                continue
             if not str(step.get("message") or "").strip():
                 findings.append(Finding("model.steps", f"step {index} is missing message", node["id"]))
             for end in ("from", "to"):
@@ -309,10 +431,10 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
 
     intent_reaching = {
         node["id"]
-        for node in loaded.nodes
+        for node in usable
         if node.get("type") == "Model" and _reaches_intent(node["id"], by_id, outgoing)
     }
-    for node in loaded.nodes:
+    for node in usable:
         kind = node.get("type")
         if kind in ("Actor", "System"):
             models = incoming_involves.get(node["id"], [])

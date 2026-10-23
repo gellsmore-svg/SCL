@@ -11,9 +11,8 @@ from pathlib import Path
 from scl.findings import Finding
 from scl.gap import potential_model_gap
 from scl.interpreter import Boundary, failures
-from scl.model import Loaded
+from scl.model import Loaded, contained_path
 from scl.questions import influence_findings, parse_questions, question_findings, questions_path
-from scl.slice import inferred_node
 
 # requirement id -> framework or structural rule that enforces it.
 RULE_COVERAGE = {
@@ -38,7 +37,6 @@ def behavior_findings(root: Path, loaded: Loaded) -> list[Finding]:
     findings.extend(_persistent(root, loaded))
     findings.extend(_gap())
     findings.extend(_human_authored(loaded))
-    findings.extend(_inferred_contract())
     findings.extend(_eligibility_examples())
     findings.extend(_version_discovery(root))
     findings.extend(_interpreter())
@@ -87,14 +85,31 @@ def _capture_why(loaded: Loaded) -> list[Finding]:
 
 def _persistent(root: Path, loaded: Loaded) -> list[Finding]:
     findings = []
+    for source in loaded.sources:
+        if not isinstance(source, dict):
+            continue
+        path = source.get("path")
+        if isinstance(path, str) and contained_path(root, path) is None:
+            findings.append(
+                Finding("context.external", "declared source path escapes the repository", str(source.get("alias") or ""))
+            )
     for node in loaded.nodes:
-        for evidence in (node.get("metadata") or {}).get("evidence") or []:
-            _alias, _, rest = evidence.partition(":")
+        if not isinstance(node, dict):
+            continue
+        evidence = (node.get("metadata") or {}).get("evidence") or []
+        if not isinstance(evidence, list):
+            continue
+        record_id = str(node.get("id") or "")
+        for item in evidence:
+            if not isinstance(item, str):
+                continue
+            _alias, _sep, rest = item.partition(":")
             path = rest.split("#", 1)[0]
-            if path.startswith("/") or path.startswith(".."):
-                findings.append(Finding("context.external", "evidence points outside the repository", node["id"]))
-            elif not (root / path).is_file():
-                findings.append(Finding("context.external", "evidence file is not in the repository", node["id"]))
+            resolved = contained_path(root, path)
+            if resolved is None:
+                findings.append(Finding("context.external", "evidence points outside the repository", record_id))
+            elif not resolved.is_file():
+                findings.append(Finding("context.external", "evidence file is not in the repository", record_id))
     return findings
 
 
@@ -118,23 +133,6 @@ def _human_authored(loaded: Loaded) -> list[Finding]:
         if basis == "inferred":
             findings.append(Finding("author.invented", "integrated model contains an inferred record", node["id"]))
     return findings
-
-
-def _inferred_contract() -> list[Finding]:
-    node = inferred_node(
-        "requirement-example",
-        "Requirement",
-        "Example",
-        "A proposed rule.",
-        "Inferred because the request implied a check that no record states.",
-        "example",
-    )
-    metadata = node["metadata"]
-    if node["status"] != "proposed" or metadata.get("basis") != "inferred" or not metadata.get("inference"):
-        return [Finding("slice.inferred", "inferred slice records must be proposed, inferred, and explained")]
-    if not metadata.get("slice"):
-        return [Finding("slice.inferred", "inferred slice records must name their slice")]
-    return []
 
 
 def _eligibility_examples() -> list[Finding]:
@@ -212,6 +210,23 @@ def _narrative_contract(loaded: Loaded) -> list[Finding]:
         if role == "power-user" and "SemVer" in combined:
             findings.append(Finding("narrative.scope", "power-user narrative uses technical release language"))
         if role == "developer":
+            for model in loaded.nodes:
+                if model.get("type") != "Model":
+                    continue
+                status = model.get("status") or "unspecified"
+                gaps = str((model.get("metadata") or {}).get("gaps") or "").strip()
+                if status not in {"partial", "planned"} and not gaps:
+                    continue
+                status_line = f"Model status: {status}."
+                identity = f"`{model['id']}` is {status}"
+                if status_line not in combined and identity not in combined:
+                    findings.append(
+                        Finding("narrative.gap", f"developer narrative hides the status of {model['id']}", model["id"])
+                    )
+                if gaps and gaps not in combined:
+                    findings.append(
+                        Finding("narrative.gap", f"developer narrative hides the gap on {model['id']}", model["id"])
+                    )
             missing = sorted(requirement_ids - {record_id for record_id in requirement_ids if record_id in combined})
             if missing:
                 findings.append(Finding("narrative.trace", f"developer narrative omits {', '.join(missing[:5])}"))

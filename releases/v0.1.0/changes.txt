@@ -1,0 +1,3 @@
+src/framework/kit-files.txt
+src/schemas/project-manifest.schema.json
+docs/install.md

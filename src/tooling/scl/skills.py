@@ -45,9 +45,13 @@ def load_skills(root: Path) -> tuple[list[dict[str, str]], list[Finding]]:
 
 
 def verify_skills(root: Path) -> tuple[list[Finding], bool]:
-    """Return findings and whether a missing critical skill must halt execution."""
+    """Return findings and whether execution must stop.
+
+    A missing or malformed registry is a discovery failure. A known critical
+    skill whose file is absent is a different halt.
+    """
     skills, findings = load_skills(root)
-    halt = False
+    halt = any(finding.rule == "skills.registry" for finding in findings)
     for skill in skills:
         verification = skill.get("Verification", "")
         record_id = skill.get("ID", "")

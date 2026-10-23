@@ -1,0 +1,9 @@
+src/framework/consume.py
+src/framework/kit-files.txt
+src/examples/consumer-model.json
+src/examples/project-manifest.json
+src/templates/project-manifest.json
+src/tooling/scl/cli.py
+src/tooling/scl/framework.py
+docs/install.md
+docs/upgrade.md

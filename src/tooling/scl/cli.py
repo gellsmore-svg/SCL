@@ -8,32 +8,43 @@ import sys
 from pathlib import Path
 
 from scl.export import generated_findings, write_generated
+from scl.findings import Finding
 from scl.framework import framework_findings, release_eligible
 from scl.gap import potential_model_gap
 from scl.gates import behavior_findings
 from scl.model import find_root, load_model, structural_findings
-from scl.narrative import mermaid_sequence, mermaid_trace
+from scl.narrative import mermaid_sequence, mermaid_trace, render_role, traceability
 from scl.skills import verify_skills
+from scl.slice import proposal_findings
 
 
-def validate(root: Path, strict: bool) -> int:
+def _skill_halt(findings: list[Finding]) -> int:
+    for finding in findings:
+        print(finding.message)
+    if any(finding.rule == "skills.registry" for finding in findings):
+        print("errors: skill discovery failed")
+    else:
+        print("errors: critical skill missing")
+    return 2
+
+
+def validate(root: Path, strict: bool, proposals: bool = False) -> int:
     skill_findings, halt = verify_skills(root)
     if halt:
-        for finding in skill_findings:
-            if finding.rule == "skills.missing":
-                print(finding.message)
-        print("errors: critical skill missing")
-        return 2
-    if not strict:
-        findings = framework_findings(root)
-    else:
+        return _skill_halt(skill_findings)
+    findings: list[Finding] = []
+    if strict:
         loaded = load_model(root)
-        findings = []
         findings.extend(skill_findings)
         findings.extend(structural_findings(loaded))
         findings.extend(framework_findings(root))
         findings.extend(behavior_findings(root, loaded))
         findings.extend(generated_findings(root, loaded))
+        findings.extend(proposal_findings(root))
+    else:
+        findings.extend(framework_findings(root))
+        if proposals:
+            findings.extend(proposal_findings(root))
     if findings:
         for finding in findings:
             print(finding.format())
@@ -44,32 +55,26 @@ def validate(root: Path, strict: bool) -> int:
     return 0
 
 
+def _write_text(text: str, output: str | None) -> None:
+    if output:
+        Path(output).write_text(text, encoding="utf-8")
+    else:
+        sys.stdout.write(text)
+
+
 def _export(root: Path, args: argparse.Namespace) -> int:
-    loaded = load_model(root)
+    """Render in memory. stdout and -o are the only destinations."""
+    loaded = load_model(root, include_slices=bool(args.include_slices))
     if args.kind == "markdown":
-        text = write_generated(root, loaded)["TRACEABILITY.md"]
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-        else:
-            sys.stdout.write(text)
+        _write_text(traceability(loaded), args.output)
         return 0
     if args.kind == "json":
         payload = {"nodes": loaded.nodes, "relationships": loaded.relationships}
-        text = json.dumps(payload, indent=2) + "\n"
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-        else:
-            sys.stdout.write(text)
+        _write_text(json.dumps(payload, indent=2) + "\n", args.output)
         return 0
     if args.kind == "narrative":
-        texts = write_generated(root, loaded)
-        role = args.role
-        relative = f"docs/REQUIREMENTS-{role}.md"
-        text = texts[relative]
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-        else:
-            sys.stdout.write(text)
+        text, _appendix = render_role(loaded, args.role)
+        _write_text(text, args.output)
         return 0
     if args.kind == "mermaid":
         view = args.view or ""
@@ -80,13 +85,25 @@ def _export(root: Path, args: argparse.Namespace) -> int:
         else:
             print("mermaid needs --view trace:<intent-id> or --view sequence:<model-id>", file=sys.stderr)
             return 1
-        if args.output:
-            Path(args.output).write_text(text, encoding="utf-8")
-        else:
-            sys.stdout.write(text)
+        _write_text(text, args.output)
         return 0
     print(f"unknown export {args.kind}", file=sys.stderr)
     return 1
+
+
+def regenerate(root: Path) -> int:
+    """Rewrite the generated documents after the model itself is valid."""
+    loaded = load_model(root)
+    problems = structural_findings(loaded)
+    if problems:
+        for finding in problems:
+            print(finding.format())
+        print(f"errors: {len(problems)}")
+        return 1
+    texts = write_generated(root, loaded)
+    for relative in texts:
+        print(relative)
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -96,14 +113,17 @@ def main(argv: list[str] | None = None) -> int:
 
     validate_parser = sub.add_parser("validate")
     validate_parser.add_argument("--strict", action="store_true")
+    validate_parser.add_argument("--proposals", action="store_true")
 
     export_parser = sub.add_parser("export")
     export_parser.add_argument("kind", choices=("markdown", "json", "mermaid", "narrative"))
     export_parser.add_argument("-o", "--output")
     export_parser.add_argument("--view")
     export_parser.add_argument("--role", default="developer")
+    export_parser.add_argument("--include-slices", action="store_true")
 
     sub.add_parser("metamodel")
+    sub.add_parser("regenerate")
 
     gap_parser = sub.add_parser("gap")
     gap_parser.add_argument("--observation", required=True)
@@ -127,15 +147,14 @@ def main(argv: list[str] | None = None) -> int:
 
     skill_findings, halt = verify_skills(root)
     if halt:
-        for finding in skill_findings:
-            if finding.rule == "skills.missing":
-                print(finding.message)
-        return 2
+        return _skill_halt(skill_findings)
 
     if args.cmd == "validate":
-        return validate(root, args.strict)
+        return validate(root, args.strict, args.proposals)
     if args.cmd == "export":
         return _export(root, args)
+    if args.cmd == "regenerate":
+        return regenerate(root)
     if args.cmd == "metamodel":
         sys.stdout.write((root / "meta" / "iomr-model" / "metamodel.json").read_text(encoding="utf-8"))
         if not (root / "meta" / "iomr-model" / "metamodel.json").read_text(encoding="utf-8").endswith("\n"):

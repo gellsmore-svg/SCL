@@ -2,7 +2,7 @@
 
 # SCL for a power-user
 
-> **Reader:** power-user. **Already knows:** the business domain, not the implementation. **Next step:** understand, then confirm the system does the right thing. **Human-constraint budget:** ~7 min read · cognitive load **M**.
+> **Reader:** power-user. **Already knows:** the business domain, not the implementation. **Next step:** understand, then confirm the system does the right thing. **Human-constraint budget:** ~8 min read · cognitive load **M**.
 
 The model is the source of truth. This narrative is generated from it.
 
@@ -54,7 +54,7 @@ Outcomes: `outcome-predictable-upgrades`, `outcome-releases-mean-consumer-impact
 The interaction that decides whether a change set is allowed to become a release.
 
 - `requirement-release-eligibility` (governance, implemented). A release is cut only when a project-consumable asset changed. Internal-only edits are recorded as framework work, not a release.
-- `requirement-consumer-impact-test` (governance, implemented). Before a release, answer whether a project on the previous release would behave differently. If yes, record the difference.
+- `requirement-consumer-impact-test` (governance, implemented). Before a release, answer whether a project on the previous release would behave differently. NO prohibits the release. There is no first-release exception.
 
 ## Four-step release lifecycle
 
@@ -139,6 +139,9 @@ Outcomes: `outcome-constraints-reliable-not-restrictive` ⚖.
 
 The interaction that executes within layer roles and fails a solution only on a real boundary violation.
 
+Model status: partial.
+Known gap: The boundary check is implemented. There is no full execution runtime, and the vector threshold in OQ-001 is unresolved.
+
 - `requirement-interpreter-honours-layers` (functional, implemented). Intent dominates, outcomes are what you optimise, models are the logical shape, and requirements are hard boundaries. The engine's private method is not prescribed.
 - `requirement-no-expressiveness-penalty` (governance, implemented). Only a real boundary violation may fail a solution. Failing a new approach that still follows the rules is a defect.
 
@@ -148,6 +151,8 @@ Outcomes: `outcome-constraints-reliable-not-restrictive` ⚖.
 
 The interaction that will check each requirement against its acceptance. Not built yet.
 
+Model status: planned.
+
 The constraints for this slice are technical and are not restated here.
 What it means: Rules block real violations and still allow a new approach that follows the rules.
 
@@ -156,6 +161,8 @@ What it means: Rules block real violations and still allow a new approach that f
 Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will adopt a development or solution-test role from the project manifest. Not built yet.
+
+Model status: planned.
 
 - `requirement-unit-scope-single-model` (functional, planned). In development, a check covers only the requirements that constrain the one model an artefact realises.
 - `requirement-solution-scope-trace-chain` (functional, planned). In solution testing, a check walks the model up to the intent, against a read-only pinned snapshot.
@@ -168,6 +175,8 @@ Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will keep tests declarative and free of a runner's name. Not built yet.
 
+Model status: planned.
+
 The constraints for this slice are technical and are not restated here.
 What it means: The project checks the right scope and does not keep a second, drifting copy of the truth.
 
@@ -176,5 +185,7 @@ What it means: The project checks the right scope and does not keep a second, dr
 Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will resolve a canonical test to the same actions every run, without inferring a path. Not built yet.
+
+Model status: planned.
 
 - `requirement-secrets-referenced-not-embedded` (security, planned). A credential never appears in the project a person can read. The project names the secret. It does not contain it.

@@ -28,7 +28,7 @@ The interaction that turns tagged source into a consumable release.
 
 - `requirement-versioned` (delivery, implemented). Every release carries a version that matches its folder name. Acceptance: Given a release folder named v0.1.0, when its manifest is read, then version is 0.1.0.
 - `requirement-change-docs` (governance, implemented). Every release explains what changed. Acceptance: Given a release folder, when it is checked, then RELEASE.md and CHANGELOG.md exist.
-- `requirement-reproducible` (delivery, implemented). Rebuilding a release from source produces the same kit bytes. Acceptance: Given the kit file list, when the kit is rebuilt, then every file matches and the digest matches.
+- `requirement-reproducible` (delivery, implemented). Each release kit matches the source snapshot recorded for that release. Acceptance: Given a release, when its kit is compared with that release's source snapshot, then every file matches and the digest matches.
 - `requirement-self-contained` (architectural, implemented). A release folder copied on its own does not point outside itself. Acceptance: Given the release folder, when its text files are scanned, then none contain a network URL, an absolute home path, or a link that leaves the folder.
 
 ## Repository layout
@@ -64,7 +64,7 @@ Outcomes: `outcome-predictable-upgrades`, `outcome-releases-mean-consumer-impact
 The interaction that decides whether a change set is allowed to become a release.
 
 - `requirement-release-eligibility` (governance, implemented). A release is cut only when a project-consumable asset changed. Internal-only edits are recorded as framework work, not a release. Acceptance: Given a change set of only meta/ and changelog/ paths, when eligibility is classified, then the result is no release. Given a change under src/schemas/, the result is release.
-- `requirement-consumer-impact-test` (governance, implemented). Before a release, answer whether a project on the previous release would behave differently. If yes, record the difference. Acceptance: Given a release, when RELEASE.md is read, then Consumer impact is YES or NO. YES includes a behavioural difference of at least 20 characters.
+- `requirement-consumer-impact-test` (governance, implemented). Before a release, answer whether a project on the previous release would behave differently. NO prohibits the release. There is no first-release exception. Acceptance: Given a release, when RELEASE.md is read, then Consumer impact is YES and a behavioural difference of at least 20 characters is recorded. NO is a failed release. The release change list must include a consumer asset.
 
 ## Four-step release lifecycle
 
@@ -150,6 +150,9 @@ Outcomes: `outcome-constraints-reliable-not-restrictive` ⚖.
 
 The interaction that executes within layer roles and fails a solution only on a real boundary violation.
 
+Model status: partial.
+Known gap: The boundary check is implemented. There is no full execution runtime, and the vector threshold in OQ-001 is unresolved.
+
 - `requirement-interpreter-honours-layers` (functional, implemented). Intent dominates, outcomes are what you optimise, models are the logical shape, and requirements are hard boundaries. The engine's private method is not prescribed. Acceptance: Given the layer-role contract, when a solution is assessed, then only requirement boundaries can fail it.
 - `requirement-no-expressiveness-penalty` (governance, implemented). Only a real boundary violation may fail a solution. Failing a new approach that still follows the rules is a defect. Acceptance: Given a solution whose only novelty is an unknown field, when it is assessed against a boundary on a different field, then it passes. Given the forbidden value, it fails.
 
@@ -159,6 +162,8 @@ Outcomes: `outcome-constraints-reliable-not-restrictive` ⚖.
 
 The interaction that will check each requirement against its acceptance. Not built yet.
 
+Model status: planned.
+
 - `requirement-conformance-per-requirement` (delivery, planned). Each requirement that constrains a model is checked against its acceptance. A machine checks what it can. A person is flagged for the rest. Acceptance: Given a future conformance run, when it finishes, then each in-scope requirement is passed, failed, or flagged for a person. Not enforced in 0.1.0.
 
 ## Verification role
@@ -166,6 +171,8 @@ The interaction that will check each requirement against its acceptance. Not bui
 Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will adopt a development or solution-test role from the project manifest. Not built yet.
+
+Model status: planned.
 
 - `requirement-declare-verification-role` (architectural, planned). A project may say whether it is for development or for solution testing. If it says nothing, it is development. Acceptance: Given a manifest with no role, when it is read, then the role is development. Scope switching is not enforced in 0.1.0.
 - `requirement-unit-scope-single-model` (functional, planned). In development, a check covers only the requirements that constrain the one model an artefact realises. Acceptance: Given the development role and one artefact, when verification runs, then only that model's requirements are in scope. Not enforced in 0.1.0.
@@ -180,6 +187,8 @@ Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will keep tests declarative and free of a runner's name. Not built yet.
 
+Model status: planned.
+
 - `requirement-test-definition-framework-agnostic` (architectural, planned). A test is a canonical definition in model terms. The authoritative model does not name a runner. Acceptance: Given the authoritative model, when it is scanned, then no runner product name is required. Not enforced in 0.1.0.
 - `requirement-ctd-declarative` (architectural, planned). A canonical test states the precondition, the trigger, and the expected result. It does not state selectors or click sequences. Acceptance: Given a canonical test, when it is read, then precondition, trigger, and expected are present and no selector is required. Not enforced in 0.1.0.
 - `requirement-semantic-locator-contract` (architectural, planned). An element is addressed by a stable test id or an accessible name, not by a stylesheet path or a screen position. Acceptance: Given a locator, when it is recorded, then it is a test id or an accessible name. Not enforced in 0.1.0.
@@ -190,6 +199,8 @@ The interaction that will keep tests declarative and free of a runner's name. No
 Outcomes: `outcome-verification-role-aligned` ⚖.
 
 The interaction that will resolve a canonical test to the same actions every run, without inferring a path. Not built yet.
+
+Model status: planned.
 
 - `requirement-execution-adapter-deterministic` (architectural, planned). The same canonical test yields the same actions on every run. Inferring a path at run time is forbidden. Acceptance: Given one canonical test and level-0 recipes, when it runs twice, then the actions match. Not enforced in 0.1.0.
 - `requirement-provisioning-separate` (architectural, planned). Setup and teardown are a different adapter, with broader access. The execution adapter has only what a user has. The model names capabilities, not adapter products. Acceptance: Given the model, when adapters are described, then provisioning and execution are different capabilities. Not enforced in 0.1.0.

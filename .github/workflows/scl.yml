@@ -1,0 +1,21 @@
+name: scl
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check
+        run: |
+          python3 validate-framework.py
+          ./imk validate --strict
+          python3 -m unittest discover -s tests -v
+          ./imk export markdown -o /tmp/TRACEABILITY.md
+          cmp TRACEABILITY.md /tmp/TRACEABILITY.md

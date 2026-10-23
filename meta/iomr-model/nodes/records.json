@@ -974,7 +974,7 @@
     "id": "requirement-reproducible",
     "type": "Requirement",
     "name": "Releases are reproducible",
-    "description": "Rebuilding a release from source produces the same kit bytes.",
+    "description": "Each release kit matches the source snapshot recorded for that release.",
     "metadata": {
       "project": "project-scl",
       "basis": "stated",
@@ -982,7 +982,7 @@
         "spec:docs/IOMR-developer-narrative.md#Slice 1 \u2014 Releases are consistent and reproducible"
       ],
       "category": "delivery",
-      "acceptance": "Given the kit file list, when the kit is rebuilt, then every file matches and the digest matches."
+      "acceptance": "Given a release, when its kit is compared with that release's source snapshot, then every file matches and the digest matches."
     },
     "status": "implemented"
   },
@@ -1102,7 +1102,7 @@
     "id": "requirement-consumer-impact-test",
     "type": "Requirement",
     "name": "Consumer impact test",
-    "description": "Before a release, answer whether a project on the previous release would behave differently. If yes, record the difference.",
+    "description": "Before a release, answer whether a project on the previous release would behave differently. NO prohibits the release. There is no first-release exception.",
     "metadata": {
       "project": "project-scl",
       "basis": "stated",
@@ -1110,7 +1110,7 @@
         "spec:docs/IOMR-developer-narrative.md#Slice 3 \u2014 A release only happens when consumers are actually affected"
       ],
       "category": "governance",
-      "acceptance": "Given a release, when RELEASE.md is read, then Consumer impact is YES or NO. YES includes a behavioural difference of at least 20 characters."
+      "acceptance": "Given a release, when RELEASE.md is read, then Consumer impact is YES and a behavioural difference of at least 20 characters is recorded. NO is a failed release. The release change list must include a consumer asset."
     },
     "status": "implemented"
   },

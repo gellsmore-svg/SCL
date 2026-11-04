@@ -422,6 +422,23 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
                 continue
             if not str(step.get("message") or "").strip():
                 findings.append(Finding("model.steps", f"step {index} is missing message", node["id"]))
+            step_name = step.get("name")
+            if step_name is not None:
+                from scl.cairn import STEP_NAME
+
+                if not isinstance(step_name, str) or STEP_NAME.fullmatch(step_name) is None:
+                    findings.append(Finding("model.steps", f"step {index} name is not a token", node["id"]))
+            binds = step.get("binds")
+            if binds is not None:
+                if not isinstance(binds, list) or not all(isinstance(item, str) and item.strip() for item in binds):
+                    findings.append(Finding("cairn.bind", f"step {index} binds must be requirement ids", node["id"]))
+                else:
+                    for bind in binds:
+                        target = by_id.get(bind)
+                        if target is None or target.get("type") != "Requirement":
+                            findings.append(
+                                Finding("cairn.bind", f"step {index} binds an unknown requirement {bind}", node["id"])
+                            )
             for end in ("from", "to"):
                 participant = step.get(end)
                 if participant not in involved_ids:

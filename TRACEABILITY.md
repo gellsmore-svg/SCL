@@ -21,6 +21,7 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 - `outcome-intent-visible` (implemented) Intent visible
 - `outcome-predictable-upgrades` (implemented) Predictable upgrades
 - `outcome-prerequisites-verified` (implemented) Prerequisites verified
+- `outcome-process-step-traceable` (implemented) A process step stays traceable
 - `outcome-releases-mean-consumer-impact` (implemented) Releases mean consumer impact
 - `outcome-reproducible-releases` (implemented) Reproducible releases
 - `outcome-reviewers-understand-min-constraint` (implemented) Reviewers understand at minimum cost
@@ -31,6 +32,7 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 
 - `model-ai-consumption` (implemented) AI consumption
 - `model-ai-inferred-iomr` (implemented) AI-inferred IOMR
+- `model-cairn-process` (implemented) Cairn process
 - `model-canonical-test-definition` (planned) Canonical test definition
 - `model-conformance-check` (planned) Conformance check
 - `model-contextual-reasoning` (implemented) Contextual reasoning
@@ -51,6 +53,9 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 ## Requirement
 
 - `requirement-ai-test-before-release` (implemented) AI-test before release
+- `requirement-cairn-bind` (implemented) Reject an unknown step bind
+- `requirement-cairn-export` (implemented) Export a named process
+- `requirement-cairn-propose` (implemented) Propose a process without changing the model
 - `requirement-canonical-test-result` (planned) Canonical results
 - `requirement-capture-why` (implemented) Capture why, not only what
 - `requirement-change-docs` (implemented) Releases include change documentation
@@ -142,6 +147,9 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 - `model-ai-inferred-iomr-involves-system-ai-harness` involves: `model-ai-inferred-iomr` → `system-ai-harness`
 - `model-ai-inferred-iomr-serves-outcome-ai-outcome-aligned` serves: `model-ai-inferred-iomr` → `outcome-ai-outcome-aligned`
 - `model-ai-inferred-iomr-serves-outcome-ai-understanding-inspectable` serves: `model-ai-inferred-iomr` → `outcome-ai-understanding-inspectable`
+- `model-cairn-process-involves-actor-maintainer` involves: `model-cairn-process` → `actor-maintainer`
+- `model-cairn-process-involves-system-scl-kit` involves: `model-cairn-process` → `system-scl-kit`
+- `model-cairn-process-serves-outcome-process-step-traceable` serves: `model-cairn-process` → `outcome-process-step-traceable`
 - `model-canonical-test-definition-involves-system-iomr-model` involves: `model-canonical-test-definition` → `system-iomr-model`
 - `model-canonical-test-definition-involves-system-validator` involves: `model-canonical-test-definition` → `system-validator`
 - `model-canonical-test-definition-serves-outcome-verification-role-aligned` serves: `model-canonical-test-definition` → `outcome-verification-role-aligned`
@@ -207,6 +215,7 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 - `outcome-intent-visible-delivers-intent-externalise-context` delivers: `outcome-intent-visible` → `intent-externalise-context`
 - `outcome-predictable-upgrades-delivers-intent-govern-framework` delivers: `outcome-predictable-upgrades` → `intent-govern-framework`
 - `outcome-prerequisites-verified-delivers-intent-govern-framework` delivers: `outcome-prerequisites-verified` → `intent-govern-framework`
+- `outcome-process-step-traceable-delivers-intent-externalise-context` delivers: `outcome-process-step-traceable` → `intent-externalise-context`
 - `outcome-releases-mean-consumer-impact-delivers-intent-govern-framework` delivers: `outcome-releases-mean-consumer-impact` → `intent-govern-framework`
 - `outcome-reproducible-releases-delivers-intent-govern-framework` delivers: `outcome-reproducible-releases` → `intent-govern-framework`
 - `outcome-reviewers-understand-min-constraint-delivers-intent-externalise-context` delivers: `outcome-reviewers-understand-min-constraint` → `intent-externalise-context`
@@ -214,6 +223,9 @@ Relationships point up the chain: Requirement specifies Model serves Outcome del
 - `outcome-verification-role-aligned-delivers-intent-govern-framework` delivers: `outcome-verification-role-aligned` → `intent-govern-framework`
 - `policy-consumer-impact-constrains-model-release-eligibility` constrains: `policy-consumer-impact` → `model-release-eligibility`
 - `requirement-ai-test-before-release-specifies-model-development-release-lifecycle` specifies: `requirement-ai-test-before-release` → `model-development-release-lifecycle`
+- `requirement-cairn-bind-specifies-model-cairn-process` specifies: `requirement-cairn-bind` → `model-cairn-process`
+- `requirement-cairn-export-specifies-model-cairn-process` specifies: `requirement-cairn-export` → `model-cairn-process`
+- `requirement-cairn-propose-specifies-model-cairn-process` specifies: `requirement-cairn-propose` → `model-cairn-process`
 - `requirement-canonical-test-result-specifies-model-canonical-test-definition` specifies: `requirement-canonical-test-result` → `model-canonical-test-definition`
 - `requirement-capture-why-specifies-model-contextual-reasoning` specifies: `requirement-capture-why` → `model-contextual-reasoning`
 - `requirement-change-docs-specifies-model-release` specifies: `requirement-change-docs` → `model-release`

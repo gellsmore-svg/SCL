@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src" / "tooling"))
 
+from scl.cairn import binding_findings, propose_cairn, render_cairn
 from scl.export import generated_findings
 from scl.framework import classify_path, digest_bytes, framework_findings, release_eligible
 from scl.gap import potential_model_gap
@@ -699,6 +700,102 @@ class ReviewTests(unittest.TestCase):
             self.assertNotIn("requirement-new", loaded_ids)
             sliced_ids = {item.get("id") for item in load_model(dest, include_slices=True).nodes}
             self.assertIn("requirement-new", sliced_ids)
+
+
+class CairnTests(unittest.TestCase):
+    def test_export_names_the_cairn_steps(self):
+        text = render_cairn(load_model(ROOT))
+        self.assertIn("PROCESS Cairn process", text)
+        self.assertIn("<submit-process>", text)
+        self.assertIn("<report-bindings>", text)
+        self.assertIn("BINDS: requirement-cairn-export", text)
+
+    def test_export_parses_as_cairn(self):
+        sibling = ROOT.parent / "Deborah" / "src"
+        if not sibling.is_dir():
+            self.skipTest("Deborah checkout is not beside SCL")
+        sys.path.insert(0, str(sibling))
+        from deborah.grammar import parse_document, validate_document
+
+        document = parse_document(render_cairn(load_model(ROOT)))
+        self.assertEqual(document.parse_errors, [])
+        self.assertEqual(validate_document(document), [])
+
+    def test_unknown_bind_is_rejected_and_a_real_one_is_kept(self):
+        ids = {node["id"] for node in load_model(ROOT).nodes if node["type"] == "Requirement"}
+        rejected = binding_findings(ids, [{"name": "submit-process", "binds": ["requirement-missing"]}])
+        self.assertTrue(any(item.rule == "cairn.bind" for item in rejected))
+        self.assertEqual(
+            binding_findings(ids, [{"name": "submit-process", "binds": ["requirement-cairn-bind"]}]),
+            [],
+        )
+
+    def test_bad_step_name_on_a_model_is_flagged(self):
+        loaded = mini_model()
+        loaded.nodes[2]["steps"] = [
+            {"from": "system-a", "to": "system-b", "message": "go", "name": "not a name"}
+        ]
+        rules = {finding.rule for finding in structural_findings(loaded)}
+        self.assertIn("model.steps", rules)
+
+    def test_propose_writes_a_slice_and_leaves_the_layer(self):
+        sibling = ROOT.parent / "Deborah" / "src"
+        if not sibling.is_dir():
+            self.skipTest("Deborah checkout is not beside SCL")
+        sys.path.insert(0, str(sibling))
+        text = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request.
+  2. <record-outcome> Record the outcome.
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            model = root / "meta" / "iomr-model"
+            (model / "nodes").mkdir(parents=True)
+            (model / "relationships").mkdir(parents=True)
+            (root / "imk.json").write_text(json.dumps({"model": "meta/iomr-model"}), encoding="utf-8")
+            records = model / "nodes" / "records.json"
+            links = model / "relationships" / "links.json"
+            records.write_text("[]\n", encoding="utf-8")
+            links.write_text("[]\n", encoding="utf-8")
+            blocked = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request.
+     BINDS: requirement-missing
+"""
+            refused = propose_cairn(root, blocked, "desk")
+            self.assertTrue(any(item.rule == "cairn.bind" for item in refused))
+            self.assertFalse((model / "nodes" / "slice-desk.json").exists())
+            findings = propose_cairn(root, text, "desk")
+            self.assertEqual(findings, [], [item.message for item in findings])
+            self.assertEqual(json.loads(records.read_text(encoding="utf-8")), [])
+            proposed = json.loads((model / "nodes" / "slice-desk.json").read_text(encoding="utf-8"))
+            ids = {node["id"] for node in proposed}
+            self.assertEqual(ids, {"model-desk", "requirement-capture-request", "requirement-record-outcome"})
+            self.assertTrue(all(node["status"] == "proposed" for node in proposed))
+            self.assertTrue(all(node["metadata"]["basis"] == "inferred" for node in proposed))
+
+    def test_check_cli_accepts_the_example(self):
+        sibling = ROOT.parent / "Deborah" / "src"
+        if not sibling.is_dir():
+            self.skipTest("Deborah checkout is not beside SCL")
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(sibling)
+        completed = subprocess.run(
+            [str(ROOT / "imk"), "cairn", "check", "src/examples/named-bind.cairn.md"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+        self.assertIn("VALID", completed.stdout)
+
+    def test_export_cli_prints_a_process(self):
+        completed = _run(["export", "cairn"])
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+        self.assertIn("<submit-process>", completed.stdout)
 
 
 def _seed_release_root(root: Path) -> Path:

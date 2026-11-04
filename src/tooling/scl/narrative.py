@@ -291,7 +291,10 @@ def mermaid_sequence(loaded: Loaded, model_id: str) -> str:
         raise SystemExit(f"unknown model {model_id}")
     lines = ["sequenceDiagram"]
     for step in model.get("steps") or []:
-        lines.append(f"  {step['from']}->>{step['to']}: {step['message']}")
+        label = str(step.get("message") or "")
+        if step.get("name"):
+            label = f"{step['name']}: {label}"
+        lines.append(f"  {step['from']}->>{step['to']}: {label}")
     if len(lines) == 1:
         lines.append(f"  note over {model_id}: no ordered steps recorded")
     return "\n".join(lines) + "\n"

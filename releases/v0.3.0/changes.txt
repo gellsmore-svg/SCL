@@ -1,0 +1,11 @@
+src/tooling/scl/cairn.py
+src/tooling/scl/cli.py
+src/tooling/scl/gates.py
+src/tooling/scl/model.py
+src/tooling/scl/narrative.py
+src/examples/named-bind.cairn.md
+src/examples/project-manifest.json
+src/templates/project-manifest.json
+docs/install.md
+docs/upgrade.md
+docs/IOMR-developer-narrative.md

@@ -310,15 +310,29 @@ second, divergent truth*.
 
 ---
 
+## Slice 12 — A named Cairn process binds to the model
+
+*Outcome: `outcome-process-step-traceable` (automated).*
+
+The **Cairn process Model** (`model-cairn-process`, human-system, implemented) is the interaction in which a person brings a named process and the framework keeps the model as the only source of truth.
+
+- **Export a named process** (`requirement-cairn-export`, functional) — `imk export cairn` renders each model as a process. A recorded interaction step keeps its `name` token, so a later renumbering does not rename the step.
+- **Reject an unknown step bind** (`requirement-cairn-bind`, governance) — a step may name the requirement it discharges. A token that is not a requirement fails the check.
+- **Propose a process without changing the model** (`requirement-cairn-propose`, governance) — `imk cairn propose` writes a slice of proposed, inferred records. The layer files stay as they are until a person integrates the slice.
+
+Deborah parses the process when that package is installed. Export does not need it. A missing install does not invent a bind.
+
+---
+
 ## The whole, briefly
 
 IOMR is a self-governing framework: it writes down *why* work exists and *how* each requirement
 serves that why, releases only when consumers are genuinely affected, and generates every artifact
 (including this document) from one authoritative model so nothing drifts. Today, releases,
-governance, context-capture, dual authoring modes and skill-gating are **implemented**; the
-interpreter contract is **partial**; and the whole verification/test-adapter layer (Slices 10–11) is
-**planned** — that is where your next build work lives, and where the model already states the
-boundaries you must build within.
+governance, context-capture, dual authoring modes, skill-gating, and the named Cairn process
+binding (Slice 12) are **implemented**; the interpreter contract is **partial**; and the whole
+verification/test-adapter layer (Slices 10–11) is **planned** — that is where your next build work
+lives, and where the model already states the boundaries you must build within.
 
 **Your next step:** build within these constraints. For `planned` Models, the Requirements above are
 the contract your implementation must satisfy; for the ⚖ points, remember your CI cannot certify

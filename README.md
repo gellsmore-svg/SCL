@@ -2,11 +2,11 @@
 
 SCL is an [IOMR](docs/IOMR-developer-narrative.md) framework. One JSON model is the source of truth for why the work exists and which requirements constrain each interaction. Releases, traceability, and the role narratives are generated or checked from that model.
 
-Version 0.2.0. Metamodel `iomr-evolved` 2.0.0.
+Version 0.3.0. Metamodel `iomr-evolved` 2.0.0.
 
 ## What is implemented
 
-Releases, repository layout, governance gates, upgrade guides, release eligibility, the four-step lifecycle, machine-readable version discovery, context capture, human-authored and AI-inferred modes, role narratives, open questions, and skill gating.
+Releases, repository layout, governance gates, upgrade guides, release eligibility, the four-step lifecycle, machine-readable version discovery, context capture, human-authored and AI-inferred modes, role narratives, open questions, skill gating, and a Cairn process binding. `./imk export cairn` renders the model as a named process. `./imk cairn check` resolves step binds when Deborah is installed. `./imk cairn propose` writes a slice and leaves the model unchanged until a person integrates it.
 
 The interpreter contract is **partial**: a solution fails only on a real requirement boundary. There is no full execution runtime.
 
@@ -32,6 +32,6 @@ Do not hand-edit `TRACEABILITY.md` or `docs/REQUIREMENTS-*.md`. If they disagree
 
 ## Layout
 
-`src`, `releases`, `meta/iomr-model`, `changelog`, `docs`, and the root `iomr-manifest.json` are required. The consumable kits are `releases/v0.1.0/iomr-kit` and `releases/v0.2.0/iomr-kit`. A copied 0.2.0 release validates a manifest and a small model with `iomr-kit/src/framework/consume.py`. Each kit is checked against its own `source-snapshot.json`.
+`src`, `releases`, `meta/iomr-model`, `changelog`, `docs`, and the root `iomr-manifest.json` are required. The consumable kits are `releases/v0.1.0/iomr-kit`, `releases/v0.2.0/iomr-kit`, and `releases/v0.3.0/iomr-kit`. A copied 0.3.0 release validates a manifest and a small model with `iomr-kit/src/framework/consume.py`. Each kit is checked against its own `source-snapshot.json`.
 
 A release is cut only when a project-consumable path changes (`src/templates`, `src/prompts`, `src/schemas`, `src/framework`, `src/tooling`, `src/examples`, `docs`, or `validate-framework.py`). Changes under `meta`, `changelog`, `internal`, `research`, or `design-work` are not a release.

@@ -2,7 +2,7 @@
 
 # SCL for a developer
 
-> **Reader:** developer. **Already knows:** the stack, the patterns, and how code is built. **Next step:** understand, then build within these constraints. **Human-constraint budget:** ~14 min read · cognitive load **M**.
+> **Reader:** developer. **Already knows:** the stack, the patterns, and how code is built. **Next step:** understand, then build within these constraints. **Human-constraint budget:** ~15 min read · cognitive load **M**.
 
 The model is the source of truth. This narrative is generated from it.
 
@@ -205,3 +205,13 @@ Model status: planned.
 - `requirement-execution-adapter-deterministic` (architectural, planned). The same canonical test yields the same actions on every run. Inferring a path at run time is forbidden. Acceptance: Given one canonical test and level-0 recipes, when it runs twice, then the actions match. Not enforced in 0.1.0.
 - `requirement-provisioning-separate` (architectural, planned). Setup and teardown are a different adapter, with broader access. The execution adapter has only what a user has. The model names capabilities, not adapter products. Acceptance: Given the model, when adapters are described, then provisioning and execution are different capabilities. Not enforced in 0.1.0.
 - `requirement-secrets-referenced-not-embedded` (security, planned). No credential appears in the model, the tests, the results, or the repository. The project names the secret. An external store resolves it at run time. Acceptance: Given the repository, when a future secret scan runs, then only references such as secret names appear. Not enforced in 0.1.0.
+
+## A named Cairn process binds to the model
+
+Outcomes: `outcome-process-step-traceable`.
+
+The interaction in which a person brings a named process and the framework checks it against the model without replacing the model.
+
+- `requirement-cairn-export` (functional, implemented). The framework can render the model as a process whose steps carry stable names. Acceptance: Given the model, when export cairn runs, then each recorded interaction step appears with its name token.
+- `requirement-cairn-bind` (governance, implemented). A step may name the requirement it discharges. A name that is not a requirement is rejected. Acceptance: Given a bind, when the target is not a requirement id, then the check fails.
+- `requirement-cairn-propose` (governance, implemented). A named process can be turned into a proposed slice. The proposal stays out of the authoritative model until a person approves it. Acceptance: Given a named process, when propose runs, then the new records are proposed and inferred, and the layer files are unchanged until a person integrates them.

@@ -189,3 +189,13 @@ The interaction that will resolve a canonical test to the same actions every run
 Model status: planned.
 
 - `requirement-secrets-referenced-not-embedded` (security, planned). A credential never appears in the project a person can read. The project names the secret. It does not contain it.
+
+## A named Cairn process binds to the model
+
+Outcomes: `outcome-process-step-traceable`.
+
+The interaction in which a person brings a named process and the framework checks it against the model without replacing the model.
+
+- `requirement-cairn-export` (functional, implemented). A person can read the model as a process whose steps keep their names.
+- `requirement-cairn-bind` (governance, implemented). A step cannot claim to satisfy a rule that is not in the model.
+- `requirement-cairn-propose` (governance, implemented). A draft process does not become a rule until a person accepts it.

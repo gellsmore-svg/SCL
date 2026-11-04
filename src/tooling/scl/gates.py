@@ -43,6 +43,7 @@ def behavior_findings(root: Path, loaded: Loaded) -> list[Finding]:
     findings.extend(question_findings(root))
     findings.extend(_influence(root))
     findings.extend(_narrative_contract(loaded))
+    findings.extend(_cairn(loaded))
     return findings
 
 
@@ -72,6 +73,9 @@ BEHAVIOR_IDS = {
     "requirement-verify-skills-before-ops",
     "requirement-interpreter-honours-layers",
     "requirement-no-expressiveness-penalty",
+    "requirement-cairn-export",
+    "requirement-cairn-bind",
+    "requirement-cairn-propose",
 }
 
 
@@ -186,6 +190,61 @@ def _influence(root: Path) -> list[Finding]:
     findings = []
     for candidate in (root / "docs").glob("recommendations*.md"):
         findings.extend(influence_findings(candidate.read_text(encoding="utf-8"), questions))
+    return findings
+
+
+def _cairn(loaded: Loaded) -> list[Finding]:
+    """Export names steps, unknown binds fail, and a proposal stays inferred."""
+    from scl.cairn import binding_findings, propose_from_process, render_cairn
+
+    findings: list[Finding] = []
+    text = render_cairn(loaded)
+    if "<submit-process>" not in text or "<report-bindings>" not in text:
+        findings.append(
+            Finding(
+                "cairn.export",
+                "export does not name the cairn process steps",
+                "requirement-cairn-export",
+            )
+        )
+    if "BINDS: requirement-cairn-export" not in text:
+        findings.append(
+            Finding(
+                "cairn.export",
+                "export does not bind the submit step to its requirement",
+                "requirement-cairn-export",
+            )
+        )
+    requirement_ids = {node["id"] for node in loaded.nodes if node.get("type") == "Requirement"}
+    rejected = binding_findings(
+        requirement_ids,
+        [{"name": "submit-process", "binds": ["requirement-missing"]}],
+    )
+    if not any(item.rule == "cairn.bind" for item in rejected):
+        findings.append(Finding("cairn.bind", "an unknown bind was accepted", "requirement-cairn-bind"))
+    accepted = binding_findings(
+        requirement_ids,
+        [{"name": "submit-process", "binds": ["requirement-cairn-bind"]}],
+    )
+    if accepted:
+        findings.append(Finding("cairn.bind", "a real requirement bind was rejected", "requirement-cairn-bind"))
+    nodes, relationships = propose_from_process(
+        "Gate sample",
+        [{"name": "gate-sample-step", "text": "Record the sample step."}],
+        "gate-sample",
+        "Inferred from a Cairn step during the gate.",
+    )
+    if not nodes or not relationships:
+        findings.append(Finding("cairn.propose", "proposal produced no records", "requirement-cairn-propose"))
+    for node in nodes:
+        if node.get("status") != "proposed" or (node.get("metadata") or {}).get("basis") != "inferred":
+            findings.append(
+                Finding("cairn.propose", "proposal was not marked inferred", "requirement-cairn-propose")
+            )
+        if node["id"] in loaded.by_id:
+            findings.append(
+                Finding("cairn.propose", "proposal collided with the model", "requirement-cairn-propose")
+            )
     return findings
 
 

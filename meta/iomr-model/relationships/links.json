@@ -901,5 +901,54 @@
     "from": "model-requirements-narrative",
     "to": "actor-reviewer",
     "rationale": "actor-reviewer takes part in the interaction model-requirements-narrative."
+  },
+  {
+    "id": "outcome-process-step-traceable-delivers-intent-externalise-context",
+    "type": "delivers",
+    "from": "outcome-process-step-traceable",
+    "to": "intent-externalise-context",
+    "rationale": "outcome-process-step-traceable is the observable change that realises intent-externalise-context."
+  },
+  {
+    "id": "model-cairn-process-serves-outcome-process-step-traceable",
+    "type": "serves",
+    "from": "model-cairn-process",
+    "to": "outcome-process-step-traceable",
+    "rationale": "model-cairn-process is the interaction that produces outcome-process-step-traceable."
+  },
+  {
+    "id": "requirement-cairn-export-specifies-model-cairn-process",
+    "type": "specifies",
+    "from": "requirement-cairn-export",
+    "to": "model-cairn-process",
+    "rationale": "requirement-cairn-export defines a constraint on the interaction model-cairn-process."
+  },
+  {
+    "id": "requirement-cairn-bind-specifies-model-cairn-process",
+    "type": "specifies",
+    "from": "requirement-cairn-bind",
+    "to": "model-cairn-process",
+    "rationale": "requirement-cairn-bind defines a constraint on the interaction model-cairn-process."
+  },
+  {
+    "id": "requirement-cairn-propose-specifies-model-cairn-process",
+    "type": "specifies",
+    "from": "requirement-cairn-propose",
+    "to": "model-cairn-process",
+    "rationale": "requirement-cairn-propose defines a constraint on the interaction model-cairn-process."
+  },
+  {
+    "id": "model-cairn-process-involves-actor-maintainer",
+    "type": "involves",
+    "from": "model-cairn-process",
+    "to": "actor-maintainer",
+    "rationale": "actor-maintainer takes part in the interaction model-cairn-process."
+  },
+  {
+    "id": "model-cairn-process-involves-system-scl-kit",
+    "type": "involves",
+    "from": "model-cairn-process",
+    "to": "system-scl-kit",
+    "rationale": "system-scl-kit takes part in the interaction model-cairn-process."
   }
 ]

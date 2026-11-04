@@ -1724,5 +1724,115 @@
       "businessConsequence": "A credential never appears in the project a person can read. The project names the secret. It does not contain it."
     },
     "status": "planned"
+  },
+  {
+    "id": "outcome-process-step-traceable",
+    "type": "Outcome",
+    "name": "A process step stays traceable",
+    "description": "A process step keeps a stable name, so a requirement can point at the step after the process is renumbered.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 12 — A named Cairn process binds to the model"
+      ],
+      "evaluation": "automated",
+      "measurement": "check",
+      "measure": "Export names each recorded process step, an unknown bind fails, and a proposal stays out of the model.",
+      "businessConsequence": "A person can point at a step by name after the process is edited."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "model-cairn-process",
+    "type": "Model",
+    "name": "Cairn process",
+    "description": "The interaction in which a person brings a named process and the framework checks it against the model without replacing the model.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 12 — A named Cairn process binds to the model"
+      ],
+      "order": 19,
+      "sliceTitle": "A named Cairn process binds to the model"
+    },
+    "status": "implemented",
+    "interaction": [
+      "human-system"
+    ],
+    "steps": [
+      {
+        "from": "actor-maintainer",
+        "to": "system-scl-kit",
+        "message": "named cairn process",
+        "name": "submit-process",
+        "binds": [
+          "requirement-cairn-export"
+        ]
+      },
+      {
+        "from": "system-scl-kit",
+        "to": "actor-maintainer",
+        "message": "binding report",
+        "name": "report-bindings",
+        "kind": "return",
+        "binds": [
+          "requirement-cairn-bind",
+          "requirement-cairn-propose"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "requirement-cairn-export",
+    "type": "Requirement",
+    "name": "Export a named process",
+    "description": "The framework can render the model as a process whose steps carry stable names.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 12 — A named Cairn process binds to the model"
+      ],
+      "category": "functional",
+      "acceptance": "Given the model, when export cairn runs, then each recorded interaction step appears with its name token.",
+      "businessConsequence": "A person can read the model as a process whose steps keep their names."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-cairn-bind",
+    "type": "Requirement",
+    "name": "Reject an unknown step bind",
+    "description": "A step may name the requirement it discharges. A name that is not a requirement is rejected.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 12 — A named Cairn process binds to the model"
+      ],
+      "category": "governance",
+      "acceptance": "Given a bind, when the target is not a requirement id, then the check fails.",
+      "businessConsequence": "A step cannot claim to satisfy a rule that is not in the model."
+    },
+    "status": "implemented"
+  },
+  {
+    "id": "requirement-cairn-propose",
+    "type": "Requirement",
+    "name": "Propose a process without changing the model",
+    "description": "A named process can be turned into a proposed slice. The proposal stays out of the authoritative model until a person approves it.",
+    "metadata": {
+      "project": "project-scl",
+      "basis": "stated",
+      "evidence": [
+        "spec:docs/IOMR-developer-narrative.md#Slice 12 — A named Cairn process binds to the model"
+      ],
+      "category": "governance",
+      "acceptance": "Given a named process, when propose runs, then the new records are proposed and inferred, and the layer files are unchanged until a person integrates them.",
+      "businessConsequence": "A draft process does not become a rule until a person accepts it."
+    },
+    "status": "implemented"
   }
 ]

@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from scl.cairn import CairnUnavailable, check_text, propose_cairn, render_cairn
 from scl.export import generated_findings, write_generated
 from scl.findings import Finding
 from scl.framework import framework_findings, release_eligible
@@ -72,6 +73,9 @@ def _export(root: Path, args: argparse.Namespace) -> int:
         payload = {"nodes": loaded.nodes, "relationships": loaded.relationships}
         _write_text(json.dumps(payload, indent=2) + "\n", args.output)
         return 0
+    if args.kind == "cairn":
+        _write_text(render_cairn(loaded), args.output)
+        return 0
     if args.kind == "narrative":
         text, _appendix = render_role(loaded, args.role)
         _write_text(text, args.output)
@@ -116,7 +120,7 @@ def main(argv: list[str] | None = None) -> int:
     validate_parser.add_argument("--proposals", action="store_true")
 
     export_parser = sub.add_parser("export")
-    export_parser.add_argument("kind", choices=("markdown", "json", "mermaid", "narrative"))
+    export_parser.add_argument("kind", choices=("markdown", "json", "mermaid", "narrative", "cairn"))
     export_parser.add_argument("-o", "--output")
     export_parser.add_argument("--view")
     export_parser.add_argument("--role", default="developer")
@@ -135,6 +139,14 @@ def main(argv: list[str] | None = None) -> int:
     eligibility_parser.add_argument("--paths", nargs="+", required=True)
 
     sub.add_parser("skills")
+
+    cairn_parser = sub.add_parser("cairn")
+    cairn_sub = cairn_parser.add_subparsers(dest="cairn_cmd", required=True)
+    check_parser = cairn_sub.add_parser("check")
+    check_parser.add_argument("path", type=Path)
+    propose_parser = cairn_sub.add_parser("propose")
+    propose_parser.add_argument("path", type=Path)
+    propose_parser.add_argument("--slug", required=True)
 
     args = parser.parse_args(argv)
     root = args.root.resolve() if args.root else find_root()
@@ -170,6 +182,42 @@ def main(argv: list[str] | None = None) -> int:
                 print(finding.format())
             return 1
         print("skills verified")
+        return 0
+    if args.cmd == "cairn":
+        return _cairn_command(root, args)
+    return 1
+
+
+def _cairn_command(root: Path, args: argparse.Namespace) -> int:
+    path = args.path
+    if not path.is_file():
+        print(f"missing cairn file {path}", file=sys.stderr)
+        return 1
+    text = path.read_text(encoding="utf-8")
+    if args.cairn_cmd == "check":
+        loaded = load_model(root)
+        requirement_ids = {node["id"] for node in loaded.nodes if node.get("type") == "Requirement"}
+        try:
+            findings, _steps = check_text(text, requirement_ids)
+        except CairnUnavailable as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        if findings:
+            for finding in findings:
+                print(finding.format())
+            print(f"errors: {len(findings)}")
+            return 1
+        print("VALID")
+        print("errors: 0")
+        return 0
+    if args.cairn_cmd == "propose":
+        findings = propose_cairn(root, text, args.slug)
+        if findings:
+            for finding in findings:
+                print(finding.format())
+            print(f"errors: {len(findings)}")
+            return 1
+        print(f"proposed slice {args.slug}")
         return 0
     return 1
 

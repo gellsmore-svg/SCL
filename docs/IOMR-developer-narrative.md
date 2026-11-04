@@ -320,7 +320,7 @@ The **Cairn process Model** (`model-cairn-process`, human-system, implemented) i
 - **Reject an unknown step bind** (`requirement-cairn-bind`, governance) — a step may name the requirement it discharges. A token that is not a requirement fails the check.
 - **Propose a process without changing the model** (`requirement-cairn-propose`, governance) — `imk cairn propose` writes a slice of proposed, inferred records. The layer files stay as they are until a person integrates the slice.
 
-Deborah parses the process when that package is installed. Export does not need it. A missing install does not invent a bind.
+The vendored process core parses the process. Export does not need it. A missing core does not invent a bind.
 
 ---
 

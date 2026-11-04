@@ -6,7 +6,7 @@ Version 0.3.0. Metamodel `iomr-evolved` 2.0.0.
 
 ## What is implemented
 
-Releases, repository layout, governance gates, upgrade guides, release eligibility, the four-step lifecycle, machine-readable version discovery, context capture, human-authored and AI-inferred modes, role narratives, open questions, skill gating, and a Cairn process binding. `./imk export cairn` renders the model as a named process. `./imk cairn check` resolves step binds when Deborah is installed. `./imk cairn propose` writes a slice and leaves the model unchanged until a person integrates it.
+Releases, repository layout, governance gates, upgrade guides, release eligibility, the four-step lifecycle, machine-readable version discovery, context capture, human-authored and AI-inferred modes, role narratives, open questions, skill gating, and a Cairn process binding. `./imk export cairn` renders the model as a named process. `./imk cairn check` resolves step binds with the vendored process core. `./imk cairn propose` writes a slice and leaves the model unchanged until a person integrates it.
 
 The interpreter contract is **partial**: a solution fails only on a real requirement boundary. There is no full execution runtime.
 

@@ -711,11 +711,7 @@ class CairnTests(unittest.TestCase):
         self.assertIn("BINDS: requirement-cairn-export", text)
 
     def test_export_parses_as_cairn(self):
-        sibling = ROOT.parent / "Deborah" / "src"
-        if not sibling.is_dir():
-            self.skipTest("Deborah checkout is not beside SCL")
-        sys.path.insert(0, str(sibling))
-        from deborah.grammar import parse_document, validate_document
+        from cairn_core import parse_document, validate_document
 
         document = parse_document(render_cairn(load_model(ROOT)))
         self.assertEqual(document.parse_errors, [])
@@ -739,10 +735,6 @@ class CairnTests(unittest.TestCase):
         self.assertIn("model.steps", rules)
 
     def test_propose_writes_a_slice_and_leaves_the_layer(self):
-        sibling = ROOT.parent / "Deborah" / "src"
-        if not sibling.is_dir():
-            self.skipTest("Deborah checkout is not beside SCL")
-        sys.path.insert(0, str(sibling))
         text = """\
 PROCESS Desk (INPUT: request; OUTPUT: record)
   1. <capture-request> Capture the request.
@@ -776,11 +768,8 @@ PROCESS Desk (INPUT: request; OUTPUT: record)
             self.assertTrue(all(node["metadata"]["basis"] == "inferred" for node in proposed))
 
     def test_check_cli_accepts_the_example(self):
-        sibling = ROOT.parent / "Deborah" / "src"
-        if not sibling.is_dir():
-            self.skipTest("Deborah checkout is not beside SCL")
         env = os.environ.copy()
-        env["PYTHONPATH"] = str(sibling)
+        env.pop("PYTHONPATH", None)
         completed = subprocess.run(
             [str(ROOT / "imk"), "cairn", "check", "src/examples/named-bind.cairn.md"],
             cwd=ROOT,
@@ -791,6 +780,26 @@ PROCESS Desk (INPUT: request; OUTPUT: record)
         )
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertIn("VALID", completed.stdout)
+
+    def test_a_consumer_can_override_the_vendored_model(self):
+        from cairn_core import DEFAULT_METAMODEL, AnnotationRule, parse_document, validate_document
+
+        def links(text, lineno, model):
+            if text.strip() != "ok":
+                return [f"line {lineno}: LINKS must be ok"]
+            return []
+
+        model = DEFAULT_METAMODEL.extend(
+            extension_constructs=frozenset({"AUDIT"}),
+            annotation_surfaces=("LINKS",),
+            annotation_rules=(AnnotationRule("LINKS", links),),
+        )
+        source = "PROCESS P (INPUT: a; OUTPUT: b)\n  1. AUDIT the books.\n     LINKS: no\n"
+        document = parse_document(source, model=model)
+        self.assertEqual(document.processes[0].steps[0].construct, "AUDIT")
+        self.assertTrue(any("LINKS must be ok" in error for error in validate_document(document, model=model)))
+        for path in (ROOT / "src" / "tooling" / "cairn_core").glob("*.py"):
+            self.assertNotIn("deborah", path.read_text(encoding="utf-8"))
 
     def test_export_cli_prints_a_process(self):
         completed = _run(["export", "cairn"])

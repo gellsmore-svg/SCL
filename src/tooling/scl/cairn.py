@@ -1,7 +1,7 @@
 """Project the IOMR model to and from a Cairn process.
 
-The model stays the source of truth. Export does not need Deborah. Check and
-propose parse a Cairn document with Deborah when that package is installed.
+The model stays the source of truth. Export, check, and propose use the
+vendored process-description core. They do not import the Deborah package.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ _PROCESS_TITLE = re.compile(r"[A-Za-z][A-Za-z0-9_-]*(?: [A-Za-z0-9_-]+)*")
 
 
 class CairnUnavailable(RuntimeError):
-    """Deborah is not importable. Export still works."""
+    """The vendored process-description core could not be imported."""
 
 
 def step_token(value: str, fallback: str) -> str:
@@ -100,11 +100,11 @@ def render_cairn(loaded) -> str:
 
 def _load_parser():
     try:
-        from deborah.grammar import parse_document, validate_document
+        from cairn_core import parse_document, validate_document
     except ImportError as exc:
         raise CairnUnavailable(
-            "Deborah is not installed. imk export cairn does not need it. "
-            "imk cairn check and imk cairn propose do."
+            "The process-description core is not on the path. "
+            "Check and propose expect the vendored cairn_core package."
         ) from exc
     return parse_document, validate_document
 
@@ -182,7 +182,7 @@ def binding_findings(requirement_ids: set[str], steps: list[dict]) -> list[Findi
 
 
 def check_text(text: str, requirement_ids: set[str]) -> tuple[list[Finding], list[dict]]:
-    """Parse with Deborah, then resolve binds against requirement ids."""
+    """Parse with the vendored core, then resolve binds against requirement ids."""
     parse_document, validate_document = _load_parser()
     document = parse_document(text)
     findings = [Finding("cairn.parse", error) for error in document.parse_errors]

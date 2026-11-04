@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+Check and propose validate a Cairn document with the vendored `cairn_core` package. A consumer can extend or override that validation model. The commands do not import Deborah. The 0.3.0 release kit is unchanged.
+
 ## 0.3.0
 
 The model can be read as a Cairn process with stable step names. A Cairn document can be checked against requirement ids, and a named process can be proposed as a slice that stays out of the model until a person approves it.

@@ -1,0 +1,510 @@
+{
+  "title": "API-driven IOMR self-model: pending independent review",
+  "changes": [
+    {
+      "op": "declare_source",
+      "source": {
+        "alias": "api-request",
+        "ref": "2026-11-13-api-implementation",
+        "path": "docs/api-authorisation.md"
+      }
+    },
+    {
+      "op": "declare_source",
+      "source": {
+        "alias": "api-tests",
+        "ref": "2026-11-13-api-implementation",
+        "path": "tests/test_service.py"
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "model-governed-iomr-authoring",
+        "type": "Model",
+        "name": "Governed IOMR authoring",
+        "description": "An agent discovers existing meaning and submits a coherent model change to the service.",
+        "status": "planned",
+        "metadata": {
+          "basis": "inferred",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Governed model mutation"
+          ],
+          "inference": "The service interaction groups the explicitly requested discovery, proposal and validation capabilities.",
+          "order": 20,
+          "sliceTitle": "Governed IOMR authoring"
+        },
+        "interaction": [
+          "system-system"
+        ],
+        "steps": [
+          {
+            "from": "system-ai-tool",
+            "to": "system-iomr-model",
+            "message": "semantic proposal",
+            "name": "propose-model-change"
+          },
+          {
+            "from": "system-iomr-model",
+            "to": "system-ai-tool",
+            "message": "candidate findings and impact",
+            "kind": "return",
+            "name": "inspect-candidate"
+          }
+        ]
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "model-reviewed-iomr-integration",
+        "type": "Model",
+        "name": "Reviewed IOMR integration",
+        "description": "A reviewer authorises an exact model revision and the service integrates it with provenance and derived documents.",
+        "status": "planned",
+        "metadata": {
+          "basis": "inferred",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Human authority and provenance"
+          ],
+          "inference": "Separating authoring from review expresses the requested authority boundary without adding a new business intent.",
+          "order": 21,
+          "sliceTitle": "Reviewed IOMR integration"
+        },
+        "interaction": [
+          "human-system"
+        ],
+        "steps": [
+          {
+            "from": "actor-reviewer",
+            "to": "system-iomr-model",
+            "message": "reviewed change authorisation",
+            "name": "review-model-change"
+          },
+          {
+            "from": "system-iomr-model",
+            "to": "actor-reviewer",
+            "message": "committed revision or corrective findings",
+            "kind": "return",
+            "name": "integrate-model-change"
+          }
+        ]
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-governed-iomr-authoring-serves-outcome-ai-consumable",
+        "type": "serves",
+        "from": "model-governed-iomr-authoring",
+        "to": "outcome-ai-consumable",
+        "rationale": "model-governed-iomr-authoring serves outcome-ai-consumable in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-governed-iomr-authoring-serves-outcome-intent-visible",
+        "type": "serves",
+        "from": "model-governed-iomr-authoring",
+        "to": "outcome-intent-visible",
+        "rationale": "model-governed-iomr-authoring serves outcome-intent-visible in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-reviewed-iomr-integration-serves-outcome-ai-understanding-inspectable",
+        "type": "serves",
+        "from": "model-reviewed-iomr-integration",
+        "to": "outcome-ai-understanding-inspectable",
+        "rationale": "model-reviewed-iomr-integration serves outcome-ai-understanding-inspectable in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-reviewed-iomr-integration-serves-outcome-context-survives",
+        "type": "serves",
+        "from": "model-reviewed-iomr-integration",
+        "to": "outcome-context-survives",
+        "rationale": "model-reviewed-iomr-integration serves outcome-context-survives in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-governed-iomr-authoring-involves-system-ai-tool",
+        "type": "involves",
+        "from": "model-governed-iomr-authoring",
+        "to": "system-ai-tool",
+        "rationale": "model-governed-iomr-authoring involves system-ai-tool in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-governed-iomr-authoring-involves-system-iomr-model",
+        "type": "involves",
+        "from": "model-governed-iomr-authoring",
+        "to": "system-iomr-model",
+        "rationale": "model-governed-iomr-authoring involves system-iomr-model in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-reviewed-iomr-integration-involves-actor-reviewer",
+        "type": "involves",
+        "from": "model-reviewed-iomr-integration",
+        "to": "actor-reviewer",
+        "rationale": "model-reviewed-iomr-integration involves actor-reviewer in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "model-reviewed-iomr-integration-involves-system-iomr-model",
+        "type": "involves",
+        "from": "model-reviewed-iomr-integration",
+        "to": "system-iomr-model",
+        "rationale": "model-reviewed-iomr-integration involves system-iomr-model in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-shared-service",
+        "type": "Requirement",
+        "name": "Shared semantic service",
+        "description": "MCP and CLI SHALL route supported mutations through the same application service.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Governed model mutation"
+          ],
+          "acceptance": "Equivalent adapter requests return equivalent candidates and findings.",
+          "category": "governance",
+          "businessConsequence": "Equivalent adapter requests return equivalent candidates and findings."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-shared-service-specifies-model-governed-iomr-authoring",
+        "type": "specifies",
+        "from": "requirement-api-shared-service",
+        "to": "model-governed-iomr-authoring",
+        "rationale": "requirement-api-shared-service specifies model-governed-iomr-authoring in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-discovery",
+        "type": "Requirement",
+        "name": "Focused agent discovery",
+        "description": "The service SHALL expose bounded discovery of records, metamodel, traces, dependencies and revisions.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Agent usability"
+          ],
+          "acceptance": "A query returns at most the requested page and reusable identities.",
+          "category": "governance",
+          "businessConsequence": "A query returns at most the requested page and reusable identities."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-discovery-specifies-model-governed-iomr-authoring",
+        "type": "specifies",
+        "from": "requirement-api-discovery",
+        "to": "model-governed-iomr-authoring",
+        "rationale": "requirement-api-discovery specifies model-governed-iomr-authoring in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-candidate-validation",
+        "type": "Requirement",
+        "name": "Complete candidate validation",
+        "description": "The service SHALL validate the complete candidate graph before integration.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Complete validation"
+          ],
+          "acceptance": "Removing the sole specifies link fails coverage without mutating the canonical graph.",
+          "category": "governance",
+          "businessConsequence": "Removing the sole specifies link fails coverage without mutating the canonical graph."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-candidate-validation-specifies-model-governed-iomr-authoring",
+        "type": "specifies",
+        "from": "requirement-api-candidate-validation",
+        "to": "model-governed-iomr-authoring",
+        "rationale": "requirement-api-candidate-validation specifies model-governed-iomr-authoring in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-semantic-convenience",
+        "type": "Requirement",
+        "name": "Semantic authoring convenience",
+        "description": "The service SHALL construct record identities and legal parent relationships for common authoring operations.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Agent usability"
+          ],
+          "acceptance": "Adding a Requirement with a known Model takes one proposal operation and creates its specifies link.",
+          "category": "governance",
+          "businessConsequence": "Adding a Requirement with a known Model takes one proposal operation and creates its specifies link."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-semantic-convenience-specifies-model-governed-iomr-authoring",
+        "type": "specifies",
+        "from": "requirement-api-semantic-convenience",
+        "to": "model-governed-iomr-authoring",
+        "rationale": "requirement-api-semantic-convenience specifies model-governed-iomr-authoring in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-approval",
+        "type": "Requirement",
+        "name": "Verified human authority",
+        "description": "The service SHALL require independently verifiable authorisation for the exact reviewed change and revision.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Human authority and provenance"
+          ],
+          "acceptance": "A self-declared approval or a signature for changed content cannot integrate.",
+          "category": "governance",
+          "businessConsequence": "A self-declared approval or a signature for changed content cannot integrate."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-approval-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-approval",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-approval specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-provenance",
+        "type": "Requirement",
+        "name": "Preserved inference provenance",
+        "description": "Integration SHALL preserve the original inference, evidence, author claim and verified review decision.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Human authority and provenance"
+          ],
+          "acceptance": "An approved inferred record has derived basis and retained original inference history.",
+          "category": "governance",
+          "businessConsequence": "An approved inferred record has derived basis and retained original inference history."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-provenance-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-provenance",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-provenance specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-concurrency",
+        "type": "Requirement",
+        "name": "Revision protection",
+        "description": "The service SHALL reject stale revisions without overwriting a newer model.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Transaction consistency"
+          ],
+          "acceptance": "A second proposal against an old revision must rebase and receive fresh review.",
+          "category": "governance",
+          "businessConsequence": "A second proposal against an old revision must rebase and receive fresh review."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-concurrency-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-concurrency",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-concurrency specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-recovery",
+        "type": "Requirement",
+        "name": "Recoverable writes",
+        "description": "The persistence adapter SHALL restore or recover a failed model transaction without silent partial state.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Transaction consistency"
+          ],
+          "acceptance": "Injected write failure restores model files, documents and proposal state.",
+          "category": "governance",
+          "businessConsequence": "Injected write failure restores model files, documents and proposal state."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-recovery-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-recovery",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-recovery specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-derived-consistency",
+        "type": "Requirement",
+        "name": "Derived document consistency",
+        "description": "Every successful integration SHALL regenerate the existing derived views in the same logical transaction.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Transaction consistency"
+          ],
+          "acceptance": "Generated document checks pass immediately after a successful commit.",
+          "category": "governance",
+          "businessConsequence": "Generated document checks pass immediately after a successful commit."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-derived-consistency-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-derived-consistency",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-derived-consistency specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "requirement-api-independent-boundary",
+        "type": "Requirement",
+        "name": "Independent acceptance verification",
+        "description": "The supported Git governance boundary SHALL reject unsigned canonical transitions using independently trusted code and policy.",
+        "status": "planned",
+        "metadata": {
+          "basis": "stated",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Independent acceptance boundary"
+          ],
+          "acceptance": "A direct canonical edit or forged receipt fails the trusted verifier.",
+          "category": "governance",
+          "businessConsequence": "A direct canonical edit or forged receipt fails the trusted verifier."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "requirement-api-independent-boundary-specifies-model-reviewed-iomr-integration",
+        "type": "specifies",
+        "from": "requirement-api-independent-boundary",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "requirement-api-independent-boundary specifies model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    },
+    {
+      "op": "add_record",
+      "record": {
+        "id": "decision-api-detached-ssh-review",
+        "type": "Decision",
+        "name": "Detached reviewer signatures",
+        "description": "Use detached SSH signatures verified against administrator-supplied allowed signers for the initial local review workflow.",
+        "status": "planned",
+        "metadata": {
+          "basis": "inferred",
+          "project": "project-scl",
+          "evidence": [
+            "api-request:docs/api-authorisation.md#Human authority and provenance"
+          ],
+          "inference": "SSH signatures offer a local independent reviewer boundary without introducing a central server; alternative authenticated verifiers remain possible."
+        }
+      }
+    },
+    {
+      "op": "add_relationship",
+      "relationship": {
+        "id": "decision-api-detached-ssh-review-constrains-model-reviewed-iomr-integration",
+        "type": "constrains",
+        "from": "decision-api-detached-ssh-review",
+        "to": "model-reviewed-iomr-integration",
+        "rationale": "decision-api-detached-ssh-review constrains model-reviewed-iomr-integration in the proposed IOMR interaction."
+      }
+    }
+  ],
+  "base_revision": "7131d696c3f716d8f6edd220dcea127154b029a1ceae578c0168d0581f5d485e",
+  "origin": "ai-inferred",
+  "author": "implementation agent, following Graham’s 2026-11-13 instruction",
+  "state": "proposed",
+  "id": "proposal-c62f6d6c2c6a837f93e3d620"
+}

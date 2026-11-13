@@ -169,7 +169,7 @@ def render_role(loaded: Loaded, role: str) -> tuple[str, str | None]:
             mark = (outcome.get("metadata") or {}).get("businessConsequence") or outcome["description"]
             judgements.append(f"- `{outcome['id']}` ⚖ {mark}")
         parts = [
-            GENERATED,
+            GENERATED.replace("meta/iomr-model", loaded.model_location),
             "",
             f"# {heading}",
             "",
@@ -240,7 +240,7 @@ def render_role(loaded: Loaded, role: str) -> tuple[str, str | None]:
 
 def traceability(loaded: Loaded) -> str:
     lines = [
-        GENERATED,
+        GENERATED.replace("meta/iomr-model", loaded.model_location),
         "",
         "# SCL traceability",
         "",

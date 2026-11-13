@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scl"
-version = "0.3.0"
+version = "0.4.0rc1"
 description = "SCL is an IOMR framework: one authoritative model, and the constraints an implementation builds within."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -14,6 +14,10 @@ authors = [{name = "gellsmore-svg"}]
 [project.scripts]
 scl = "scl.cli:main"
 imk = "scl.cli:main"
+scl-mcp = "scl.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src/tooling"]
+
+[project.optional-dependencies]
+mcp = ["mcp>=2.3,<3"]

@@ -4,9 +4,15 @@ stages:
 scl:
   stage: test
   image: python:3.12-slim
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends openssh-client
+    - python -m pip install -e ".[mcp]"
   script:
     - python3 validate-framework.py
     - ./imk validate --strict
     - python3 -m unittest discover -s tests -v
     - ./imk export markdown -o /tmp/TRACEABILITY.md
     - cmp TRACEABILITY.md /tmp/TRACEABILITY.md
+    - python3 tests/evaluate_agent_workflows.py
+
+# Independent acceptance requires protected CI policy; see docs/ci/gitlab-trusted-model.yml.

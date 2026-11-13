@@ -16,7 +16,6 @@ def inferred_node(record_id: str, type_name: str, name: str, description: str, i
         "description": description,
         "status": "proposed",
         "metadata": {
-            "project": "project-scl",
             "basis": "inferred",
             "inference": inference,
             "slice": slug,
@@ -26,8 +25,15 @@ def inferred_node(record_id: str, type_name: str, name: str, description: str, i
 
 
 def propose_slice(root: Path, slug: str, nodes: list[dict], relationships: list[dict]) -> tuple[Path, Path]:
+    import re
+    from scl.contracts import ServiceError
+    from scl.model import contained_path
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
+        raise ServiceError("slice.identity", "Invalid slice slug.")
     config = json.loads((root / "imk.json").read_text(encoding="utf-8"))
-    model = root / config["model"]
+    model = contained_path(root, config["model"])
+    if model is None:
+        raise ServiceError("storage.path", "Model path escapes the project.")
     node_path = model / "nodes" / f"slice-{slug}.json"
     rel_path = model / "relationships" / f"slice-{slug}.json"
     node_path.parent.mkdir(parents=True, exist_ok=True)
@@ -38,26 +44,9 @@ def propose_slice(root: Path, slug: str, nodes: list[dict], relationships: list[
 
 
 def integrate_slice(root: Path, slug: str) -> None:
-    """Move an approved slice into the layer files and delete the slice files."""
-    config = json.loads((root / "imk.json").read_text(encoding="utf-8"))
-    model = root / config["model"]
-    node_path = model / "nodes" / f"slice-{slug}.json"
-    rel_path = model / "relationships" / f"slice-{slug}.json"
-    nodes = json.loads(node_path.read_text(encoding="utf-8"))
-    relationships = json.loads(rel_path.read_text(encoding="utf-8"))
-    for node in nodes:
-        metadata = node.setdefault("metadata", {})
-        metadata.pop("slice", None)
-    layer_nodes = model / "nodes" / "records.json"
-    layer_rels = model / "relationships" / "links.json"
-    existing_nodes = json.loads(layer_nodes.read_text(encoding="utf-8"))
-    existing_rels = json.loads(layer_rels.read_text(encoding="utf-8"))
-    existing_nodes.extend(nodes)
-    existing_rels.extend(relationships)
-    layer_nodes.write_text(json.dumps(existing_nodes, indent=2) + "\n", encoding="utf-8")
-    layer_rels.write_text(json.dumps(existing_rels, indent=2) + "\n", encoding="utf-8")
-    node_path.unlink()
-    rel_path.unlink()
+    """Removed unsafe mutation path. Import the slice through ModelService instead."""
+    from scl.contracts import ServiceError
+    raise ServiceError("approval.required", "Direct slice integration is disabled. Use import_slice, correct candidate findings, approve_change and commit_change.", slug)
 
 
 def _load_array(path: Path) -> tuple[list, Finding | None]:

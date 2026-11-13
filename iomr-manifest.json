@@ -1,7 +1,9 @@
 {
   "name": "SCL",
-  "version": "0.3.0",
+  "version": "0.4.0-rc.1",
   "metamodel": "iomr-evolved",
   "metamodelVersion": "2.0.0",
-  "modelLocation": "meta/iomr-model"
+  "modelLocation": "meta/iomr-model",
+  "releaseStatus": "pending-human-approval",
+  "latestReleasedVersion": "0.3.0"
 }

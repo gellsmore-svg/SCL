@@ -51,6 +51,8 @@ class Loaded:
     relationships: list[dict] = field(default_factory=list)
     sources: list[dict] = field(default_factory=list)
     expect: list = field(default_factory=list)
+    metamodel: dict | None = None
+    model_location: str = "meta/iomr-model"
 
     @property
     def by_id(self) -> dict[str, dict]:
@@ -101,6 +103,7 @@ def load_model(root: Path, include_slices: bool = False) -> Loaded:
         relationships.extend(_collect(model_dir / "relationships", include_slices=True))
     return Loaded(
         root=root,
+        model_location=config["model"],
         nodes=nodes,
         relationships=relationships,
         sources=list(config.get("sources") or []),
@@ -139,8 +142,15 @@ def contained_path(root: Path, relative: str) -> Path | None:
 def metamodel_findings(root: Path) -> list[Finding]:
     """The project must declare the one supported metamodel, and the file must match."""
     imk_path = root / "imk.json"
-    meta_path = root / "meta" / "iomr-model" / "metamodel.json"
-    if not imk_path.is_file() or not meta_path.is_file():
+    if not imk_path.is_file():
+        return [Finding("metamodel.identity", "imk.json is missing")]
+    try:
+        config = _read_json(imk_path)
+        model_dir = contained_path(root, config.get("model", ""))
+    except (ValueError, AttributeError):
+        model_dir = None
+    meta_path = model_dir / "metamodel.json" if model_dir else root / "missing-metamodel"
+    if not meta_path.is_file():
         return [Finding("metamodel.identity", "imk.json or metamodel.json is missing")]
     try:
         config = _read_json(imk_path)
@@ -190,9 +200,11 @@ def _evidence_finding(root: Path, sources: dict[str, dict], evidence: str, recor
         body = anchor[1:]
         if "-L" in body:
             start_s, end_s = body.split("-L", 1)
-            start, end = int(start_s), int(end_s)
         else:
-            start = end = int(body)
+            start_s = end_s = body
+        if not start_s.isdigit() or not end_s.isdigit():
+            return Finding("ref.evidence", "malformed line anchor", record_id)
+        start, end = int(start_s), int(end_s)
         if start < 1 or end > len(lines) or start > end:
             return Finding("ref.evidence", f"line anchor {anchor} is outside {path_part}", record_id)
         return None
@@ -229,7 +241,10 @@ def _metadata(node: dict, findings: list[Finding], record_id: str) -> dict:
 
 def structural_findings(loaded: Loaded) -> list[Finding]:
     findings: list[Finding] = []
-    findings.extend(metamodel_findings(loaded.root))
+    if loaded.metamodel is None:
+        findings.extend(metamodel_findings(loaded.root))
+    elif (loaded.metamodel.get("name"), loaded.metamodel.get("version")) != SUPPORTED_METAMODEL:
+        findings.append(Finding("metamodel.identity", "only iomr-evolved 2.0.0 is supported"))
     by_id = loaded.by_id
     sources = {}
     for item in loaded.sources:
@@ -289,19 +304,23 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
     outgoing: dict[str, list[tuple[str, str]]] = {}
     incoming_involves: dict[str, list[str]] = {}
     refines: list[dict] = []
+    relationship_ids = set()
     for rel in loaded.relationships:
         if not isinstance(rel, dict):
             findings.append(Finding("record.shape", "relationship is not an object"))
             continue
         rel_id = str(rel.get("id", ""))
+        if not rel_id or rel_id in relationship_ids:
+            findings.append(Finding("rel.identity", "relationship id is missing or duplicated", rel_id))
+        relationship_ids.add(rel_id)
         kind = rel.get("type")
         source_id = rel.get("from")
         target_id = rel.get("to")
         rationale = rel.get("rationale") or ""
-        if len(rationale.strip()) < 20:
+        if not isinstance(rationale, str) or len(rationale.strip()) < 20:
             findings.append(Finding("rel.rationale", "rationale must be at least 20 characters", rel_id))
-        source = by_id.get(source_id)
-        target = by_id.get(target_id)
+        source = by_id.get(source_id) if isinstance(source_id, str) else None
+        target = by_id.get(target_id) if isinstance(target_id, str) else None
         if source is None or target is None:
             findings.append(Finding("rel.legality", "relationship endpoint is missing", rel_id))
             continue

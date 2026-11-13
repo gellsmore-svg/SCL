@@ -1,3 +1,7 @@
+# 0.4.0-rc.1 — pending human approval
+
+Added shared semantic service, CLI/MCP adapters, full-candidate validation, signed review, provenance, revision checks, recoverable JSON transactions and trusted publication verification. Direct integrate_slice is intentionally disabled. Existing exports, Cairn proposals and historical release kits remain supported.
+
 # Changelog
 
 ## Unreleased

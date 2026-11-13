@@ -1,0 +1,35 @@
+name: IOMR authoritative boundary
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+jobs:
+  signed-model-transition:
+    runs-on: ubuntu-latest
+    steps:
+      # Trusted code comes exclusively from the protected base, never PR code.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          path: candidate
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify signed transition with trusted code and policy
+        env:
+          SCL_REVIEW_SIGNERS: ${{ vars.SCL_REVIEW_SIGNERS }}
+        run: |
+          printf '%s\n' "$SCL_REVIEW_SIGNERS" > "$RUNNER_TEMP/allowed_signers"
+          PYTHONPATH="$GITHUB_WORKSPACE/trusted/src/tooling" python -m scl.governance \
+            --base "$GITHUB_WORKSPACE/trusted" --candidate "$GITHUB_WORKSPACE/candidate" \
+            --allowed-signers "$RUNNER_TEMP/allowed_signers"

@@ -1,0 +1,278 @@
+[
+  {
+    "scenario": "A",
+    "description": "Add a Requirement under a known Model",
+    "passed": true,
+    "operations": 5,
+    "response_bytes": 11646,
+    "max_response_bytes": 4672,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "add_requirement",
+        "response_bytes": 4672,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 4670,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 1574,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 502,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "scenario": "B",
+    "description": "Add an interaction, participants and constraints together",
+    "passed": true,
+    "operations": 5,
+    "response_bytes": 16662,
+    "max_response_bytes": 6401,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "add_model",
+        "response_bytes": 6401,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 6397,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 3065,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 571,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "scenario": "C",
+    "description": "Discover and reuse an existing Intent/Outcome chain",
+    "passed": true,
+    "operations": 7,
+    "response_bytes": 12754,
+    "max_response_bytes": 4684,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "find_records",
+        "response_bytes": 306,
+        "status": "ok"
+      },
+      {
+        "operation": "get_trace",
+        "response_bytes": 757,
+        "status": "ok"
+      },
+      {
+        "operation": "add_requirement",
+        "response_bytes": 4684,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 4682,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 1592,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 505,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "scenario": "D",
+    "description": "Correct an illegal relationship from structured findings",
+    "passed": true,
+    "operations": 7,
+    "response_bytes": 12377,
+    "max_response_bytes": 4097,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "link_records",
+        "response_bytes": 1522,
+        "status": "ok"
+      },
+      {
+        "operation": "get_proposal",
+        "response_bytes": 765,
+        "status": "ok"
+      },
+      {
+        "operation": "update_proposal",
+        "response_bytes": 4097,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 4096,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 1166,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 503,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "scenario": "E",
+    "description": "Rebase after a competing revision commits",
+    "passed": true,
+    "operations": 13,
+    "response_bytes": 29495,
+    "max_response_bytes": 4724,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "add_requirement",
+        "response_bytes": 4660,
+        "status": "ok"
+      },
+      {
+        "operation": "add_requirement",
+        "response_bytes": 4664,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 4658,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 1556,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 499,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 310,
+        "status": "error"
+      },
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "get_proposal",
+        "response_bytes": 1163,
+        "status": "ok"
+      },
+      {
+        "operation": "update_proposal",
+        "response_bytes": 4724,
+        "status": "ok"
+      },
+      {
+        "operation": "preview_change",
+        "response_bytes": 4722,
+        "status": "ok"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 1562,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 521,
+        "status": "ok"
+      }
+    ]
+  },
+  {
+    "scenario": "F",
+    "description": "Block unauthenticated inferred integration",
+    "passed": true,
+    "operations": 5,
+    "response_bytes": 5940,
+    "max_response_bytes": 4672,
+    "direct_file_knowledge_required": false,
+    "calls": [
+      {
+        "operation": "get_model_revision",
+        "response_bytes": 228,
+        "status": "ok"
+      },
+      {
+        "operation": "add_requirement",
+        "response_bytes": 4672,
+        "status": "ok"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 331,
+        "status": "error"
+      },
+      {
+        "operation": "approve_change",
+        "response_bytes": 304,
+        "status": "error"
+      },
+      {
+        "operation": "commit_change",
+        "response_bytes": 405,
+        "status": "error"
+      }
+    ]
+  }
+]

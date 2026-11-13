@@ -105,6 +105,8 @@ def build_kit(root: Path, dest: Path) -> str:
         target = dest / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((root / relative).read_bytes())
+        import shutil
+        shutil.copymode(root / relative, target)
     digest = kit_digest(root, files)
     (dest / "MANIFEST.sha256").write_text(digest + "\n", encoding="utf-8")
     return digest

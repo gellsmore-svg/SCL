@@ -1,0 +1,20 @@
+{
+  "nodes": [
+    {
+      "id": "intent-adopt",
+      "type": "Intent",
+      "name": "Adopt the framework",
+      "description": "A project keeps one reason for the work."
+    },
+    {
+      "id": "requirement-record-reason",
+      "type": "Requirement",
+      "name": "Record one reason",
+      "description": "The project records one reason.",
+      "metadata": {"acceptance": "Given a project, when the model is checked, then one reason is present."}
+    }
+  ],
+  "relationships": [
+    {"from": "requirement-record-reason", "to": "intent-adopt"}
+  ]
+}

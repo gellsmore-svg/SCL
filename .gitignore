@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 *.egg-info/
 .pytest_cache/
+
+.scl/lock
+.scl/transaction.json
+.scl-write-*

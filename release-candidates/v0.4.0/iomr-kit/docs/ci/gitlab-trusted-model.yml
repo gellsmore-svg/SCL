@@ -1,0 +1,8 @@
+# Install in a separately protected CI-policy project. Do not include this from
+# the merge-request branch and call it an independent trust boundary.
+# Supply BASE_TREE and CANDIDATE_TREE as already materialised, read-only data
+# checkouts; TRUSTED_SCL is a pinned installation, not the candidate package.
+iomr-signed-transition:
+  image: python:3.12-slim
+  script:
+    - 'PYTHONPATH="$TRUSTED_SCL/src/tooling" python -m scl.governance --base "$BASE_TREE" --candidate "$CANDIDATE_TREE" --allowed-signers "$SCL_ALLOWED_SIGNERS"'

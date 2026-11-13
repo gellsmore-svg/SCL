@@ -126,6 +126,10 @@ def main(argv: list[str] | None = None) -> int:
     export_parser.add_argument("--role", default="developer")
     export_parser.add_argument("--include-slices", action="store_true")
 
+    api_parser = sub.add_parser("api", help="Structured model service operations")
+    from scl.service import OPERATIONS
+    api_parser.add_argument("operation", choices=sorted(OPERATIONS))
+    api_parser.add_argument("--json", default="{}", help="JSON object, @request.json, or - for stdin")
     sub.add_parser("metamodel")
     sub.add_parser("regenerate")
 
@@ -151,6 +155,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = args.root.resolve() if args.root else find_root()
 
+    if args.cmd == "api":
+        from scl.contracts import result
+        from scl.service import execute
+        try:
+            raw = args.json
+            if raw == "-":
+                raw = sys.stdin.read()
+            elif raw.startswith("@"):
+                raw = Path(raw[1:]).read_text(encoding="utf-8")
+            params = json.loads(raw)
+            if not isinstance(params, dict):
+                raise ValueError("request must be an object")
+            response = execute(root, args.operation, **params)
+        except (OSError, ValueError, TypeError) as exc:
+            response = result(findings=[Finding("request.shape", str(exc))])
+        print(json.dumps(response, indent=2))
+        return 0 if response["status"] == "ok" else 1
+
     if args.cmd == "gap":
         sys.stdout.write(
             potential_model_gap(args.observation, args.concern, args.possibilities, args.question)
@@ -168,9 +190,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "regenerate":
         return regenerate(root)
     if args.cmd == "metamodel":
-        sys.stdout.write((root / "meta" / "iomr-model" / "metamodel.json").read_text(encoding="utf-8"))
-        if not (root / "meta" / "iomr-model" / "metamodel.json").read_text(encoding="utf-8").endswith("\n"):
-            sys.stdout.write("\n")
+        config = json.loads((root / "imk.json").read_text(encoding="utf-8"))
+        text = (root / config["model"] / "metamodel.json").read_text(encoding="utf-8")
+        sys.stdout.write(text if text.endswith("\n") else text + "\n")
         return 0
     if args.cmd == "eligibility":
         eligible = release_eligible(args.paths)

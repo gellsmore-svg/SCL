@@ -44,4 +44,8 @@ def generated_findings(root: Path, loaded: Loaded) -> list[Finding]:
             continue
         if path.read_text(encoding="utf-8") != text:
             findings.append(Finding("model.source", f"{relative} does not match the model; regenerate it"))
+    for role in ROLES:
+        relative = f"docs/REQUIREMENTS-{role}-appendix.md"
+        if relative not in expected and (root / relative).exists():
+            findings.append(Finding("model.source", f"obsolete generated {relative}; regenerate it"))
     return findings

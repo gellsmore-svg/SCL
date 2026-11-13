@@ -189,11 +189,11 @@ class RuleTests(unittest.TestCase):
             propose_slice(root, "demo", [node], [])
             self.assertEqual(json.loads(records.read_text()), [])
             self.assertTrue((model / "nodes" / "slice-demo.json").is_file())
-            integrate_slice(root, "demo")
-            integrated = json.loads(records.read_text())
-            self.assertEqual(integrated[0]["status"], "proposed")
-            self.assertNotIn("slice", integrated[0]["metadata"])
-            self.assertFalse((model / "nodes" / "slice-demo.json").exists())
+            from scl.contracts import ServiceError
+            with self.assertRaises(ServiceError):
+                integrate_slice(root, "demo")
+            self.assertEqual(json.loads(records.read_text()), [])
+            self.assertTrue((model / "nodes" / "slice-demo.json").exists())
 
 
 class RepositoryTests(unittest.TestCase):

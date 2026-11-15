@@ -54,6 +54,9 @@ CHANGE_SCHEMA = {"oneOf": [
     {"type": "object", "required": ["op", "id", "reason"], "properties": {"op": {"const": "remove_relationship"}, "id": {"type": "string"}, "reason": {"type": "string", "minLength": 20}}},
     {"type": "object", "required": ["op", "id", "superseded_by", "reason"], "properties": {"op": {"const": "retire_record"}, "id": {"type": "string"}, "superseded_by": {"type": "string"}, "reason": {"type": "string", "minLength": 20}}},
     {"type": "object", "required": ["op", "source"], "properties": {"op": {"const": "declare_source"}, "source": {"type": "object", "required": ["alias", "path", "ref"], "properties": {k: {"type": "string"} for k in ("alias", "path", "ref")}}}},
+    {"type": "object", "required": ["op", "source", "content"], "properties": {"op": {"const": "capture_source"}, "source": {"type": "object", "required": ["alias", "path", "ref"], "properties": {k: {"type": "string"} for k in ("alias", "path", "ref")}}, "content": {"type": "string"}}},
+    {"type": "object", "required": ["op", "question"], "properties": {"op": {"const": "add_question"}, "question": {"type": "object"}}},
+    {"type": "object", "required": ["op", "id", "patch"], "properties": {"op": {"const": "update_question"}, "id": {"type": "string"}, "patch": {"type": "object"}}},
 ]}
 
 

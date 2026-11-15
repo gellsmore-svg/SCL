@@ -109,7 +109,7 @@ class JsonStorage:
                 if not p.name.startswith("slice-")]
 
     def protected_paths(self) -> set[str]:
-        paths = {"imk.json", self.model.relative_to(self.root).as_posix() + "/metamodel.json", "TRACEABILITY.md"}
+        paths = {"imk.json", self.model.relative_to(self.root).as_posix() + "/metamodel.json", "TRACEABILITY.md", "meta/open-questions.md"}
         paths.update(self.model_paths("nodes"))
         paths.update(self.model_paths("relationships"))
         paths.update(source["path"] for source in self.config.get("sources", []))
@@ -150,6 +150,14 @@ class JsonStorage:
             path = self.path(name)
             if path.is_file() and name.endswith(".json") and json.loads(path.read_bytes()) == json.loads(writes[name]):
                 writes[name] = path.read_bytes()
+        for relative, content in candidate.captures.items():
+            if not isinstance(content, str):
+                raise ServiceError("ref.evidence", "Captured source content must be text.", relative)
+            writes[relative] = content.encode()
+        if candidate.questions_changed:
+            from scl.questions import render_questions
+
+            writes["meta/open-questions.md"] = render_questions(candidate.questions).encode()
         texts = generated_texts(candidate)
         writes.update({name: text.encode() for name, text in texts.items()})
         for role in ROLES:
@@ -175,8 +183,11 @@ class JsonStorage:
         after = self.snapshot()
         config = json.loads(writes["imk.json"]) if "imk.json" in writes else self.config
         for source in config.get("sources", []):
-            path = self.path(source["path"])
-            after[source["path"]] = hashlib.sha256(path.read_bytes()).hexdigest()
+            name = source["path"]
+            if name in writes:
+                continue
+            path = self.path(name)
+            after[name] = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
         for name, data in writes.items():
             after[name] = hashlib.sha256(data).hexdigest() if data is not None else None
         return dict(sorted(after.items()))

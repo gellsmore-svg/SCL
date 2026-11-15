@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 import hashlib
 import json
+from pathlib import Path
 import re
 
 from scl.contracts import ServiceError
@@ -51,8 +52,19 @@ def normalize(changes: list[dict], origin: str) -> list[dict]:
         elif op == "add_relationship":
             rel = change["relationship"]
             rel.setdefault("id", f"{rel['from']}-{rel['type']}-{rel['to']}")
-        elif op not in {"update_record", "remove_relationship", "retire_record", "declare_source"}:
-            raise ServiceError("change.operation", "Use add_record, update_record, add_relationship, remove_relationship, retire_record or declare_source.")
+        elif op not in {
+            "update_record",
+            "remove_relationship",
+            "retire_record",
+            "declare_source",
+            "capture_source",
+            "add_question",
+            "update_question",
+        }:
+            raise ServiceError(
+                "change.operation",
+                "Use add_record, update_record, add_relationship, remove_relationship, retire_record, declare_source, capture_source, add_question or update_question.",
+            )
     return output
 
 
@@ -105,6 +117,15 @@ def apply_changes(loaded: Loaded, proposal: dict, reviewer: str = "pending-revie
             if path is None or not path.is_file():
                 raise ServiceError("ref.evidence", "Source must be an existing file inside the project.")
             candidate.sources.append(source)
+        elif op == "capture_source":
+            _capture_source(candidate, change)
+        elif op == "add_question":
+            from scl.questions import normalize_question
+
+            candidate.questions.append(normalize_question(change.get("question"), candidate.questions))
+            candidate.questions_changed = True
+        elif op == "update_question":
+            _update_question(candidate, change)
         elif op == "add_record":
             node = deepcopy(change["record"])
             rid = node["id"]
@@ -191,7 +212,100 @@ def candidate_findings(candidate: Loaded) -> list[Finding]:
     findings = structural_findings(candidate)
     findings.extend(Finding("author.invented", "Integrated records cannot retain inferred basis.", n["id"])
                     for n in candidate.nodes if n.get("metadata", {}).get("basis") == "inferred")
+    if candidate.questions_changed:
+        from scl.questions import RISK_LEVELS, FIELDS
+
+        seen = set()
+        for question in candidate.questions:
+            record_id = str(question.get("ID", ""))
+            if record_id in seen:
+                findings.append(Finding("questions.fields", "duplicate question id", record_id))
+            seen.add(record_id)
+            missing = [field for field in FIELDS if not question.get(field)]
+            if missing:
+                findings.append(Finding("questions.fields", f"missing {', '.join(missing)}", record_id))
+            if question.get("Risk Level") not in RISK_LEVELS:
+                findings.append(Finding("questions.fields", "Risk Level is not in the allowed set", record_id))
     return findings
+
+
+_CAPTURE_SUFFIXES = {".md", ".txt", ".json", ".yml", ".yaml", ".rst", ".toml"}
+
+
+def captured_source_path(model_location: str, alias: str, original: str) -> str:
+    if not isinstance(alias, str) or re.fullmatch(r"[a-z][a-z0-9-]*", alias) is None:
+        raise ServiceError("ref.evidence", "Source alias must be a lowercase identifier.", str(alias))
+    if not isinstance(model_location, str) or not model_location.strip() or ".." in model_location.split("/"):
+        raise ServiceError("storage.path", "Model location is not usable for a captured source.")
+    if not isinstance(original, str) or not original.strip():
+        raise ServiceError("ref.evidence", "Captured source needs its original repository path.", alias)
+    lower = original.lower()
+    if lower.endswith(".cairn.md"):
+        suffix = ".cairn.md"
+    else:
+        suffix = Path(original).suffix.lower()
+        if suffix not in _CAPTURE_SUFFIXES:
+            suffix = ".txt"
+    return f"{model_location.strip('/')}/sources/{alias}{suffix}"
+
+
+def _capture_source(candidate: Loaded, change: dict) -> None:
+    from scl.model import contained_path
+
+    source = change.get("source")
+    content = change.get("content")
+    if not isinstance(source, dict) or not isinstance(content, str):
+        raise ServiceError("ref.evidence", "Captured source needs source metadata and UTF-8 content.")
+    if not all(isinstance(source.get(key), str) and source[key].strip() for key in ("alias", "path", "ref")):
+        raise ServiceError("ref.evidence", "Source needs alias, repository-relative path and immutable reference.")
+    if len(content.encode()) > 400_000:
+        raise ServiceError("request.size", "Captured file exceeds 400000 bytes; split it into smaller sources.", source["alias"])
+    if any(item.get("alias") == source["alias"] for item in candidate.sources):
+        raise ServiceError("ref.evidence", "Source alias already exists; reuse it.", source["alias"])
+    original = contained_path(candidate.root, source["path"])
+    if original is not None and original.is_file():
+        try:
+            disk = original.read_text(encoding="utf-8")
+        except UnicodeError as exc:
+            raise ServiceError("ref.evidence", "Only UTF-8 text can be captured into the model.", source["alias"]) from exc
+        if disk != content:
+            raise ServiceError("ref.evidence", "Captured content does not match the file.", source["alias"])
+    destination = captured_source_path(candidate.model_location, source["alias"], source["path"])
+    if contained_path(candidate.root, destination) is None:
+        raise ServiceError("storage.path", "Captured source must stay inside the project.", destination)
+    if any(item.get("path") == destination for item in candidate.sources):
+        raise ServiceError("ref.evidence", "Captured path is already a source.", destination)
+    candidate.sources.append({
+        "alias": source["alias"],
+        "path": destination,
+        "ref": source["ref"],
+        "captured_from": source["path"],
+    })
+    candidate.captures[destination] = content
+
+
+def _update_question(candidate: Loaded, change: dict) -> None:
+    from scl.questions import FIELDS, normalize_question
+
+    question_id = change.get("id")
+    patch = change.get("patch")
+    if not isinstance(question_id, str) or not question_id.strip() or not isinstance(patch, dict):
+        raise ServiceError("questions.fields", "Update a question by id with a patch object.")
+    if "ID" in patch and patch["ID"] != question_id:
+        raise ServiceError("questions.fields", "Question ID is immutable.", question_id)
+    current = next((item for item in candidate.questions if item.get("ID") == question_id), None)
+    if current is None:
+        raise ServiceError("questions.fields", "Question is not in the register.", question_id)
+    merged = dict(current)
+    for key, value in patch.items():
+        if key not in FIELDS:
+            raise ServiceError("questions.fields", f"Unknown question field {key}.", question_id)
+        merged[key] = value
+    merged["ID"] = question_id
+    others = [item for item in candidate.questions if item.get("ID") != question_id]
+    checked = normalize_question(merged, others)
+    candidate.questions = [checked if item.get("ID") == question_id else item for item in candidate.questions]
+    candidate.questions_changed = True
 
 
 def dependants(loaded: Loaded, ids) -> list[str]:

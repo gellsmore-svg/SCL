@@ -173,9 +173,21 @@ class ModelService:
         proposal["id"] = "proposal-" + digest(proposal)[:24]
         if self.storage.proposal_exists(proposal["id"]):
             existing = self.storage.read_proposal(proposal["id"])
-            if existing["state"] in {"rejected", "committed"}:
-                return self._get_proposal(existing["id"])
-            proposal = existing
+            # Identical retries share the id. A different body, or a closed
+            # proposal, must not be returned as if it were this request.
+            same = (
+                existing.get("title") == proposal["title"]
+                and existing.get("origin") == proposal["origin"]
+                and existing.get("author") == proposal["author"]
+                and existing.get("changes") == proposal["changes"]
+            )
+            if same and existing.get("state") in {"proposed", "approved"}:
+                proposal = existing
+            else:
+                raise ServiceError(
+                    "proposal.conflict",
+                    "Stored proposal content differs or the proposal is closed.",
+                )
         else:
             self._save(proposal)
         return self._proposal_report(proposal)
@@ -221,7 +233,8 @@ class ModelService:
         from dataclasses import asdict
         data = {"proposal_id": proposal["id"], "proposal_revision": proposal_revision(proposal),
                 "state": proposal["state"], "required_approvals": ["trusted-reviewer-signature"],
-                "approval_verified": False, "validation_status": "invalid"}
+                "approval_verified": False, "validation_status": "invalid",
+                "changes": proposal.get("changes", [])}
         try:
             candidate, impact, findings, writes, payload = self._evaluate(proposal, reviewer)
             data.update(impact)
@@ -278,6 +291,8 @@ class ModelService:
             unsigned = {k: v for k, v in proposal.items() if k not in {"state", "approval", "committed_revision"}}
             if digest(unsigned) != receipt["payload"]["proposal_digest"] or proposal["committed_revision"] != receipt["payload"]["candidate_revision"]:
                 raise ServiceError("approval.invalid", "Committed proposal differs from its receipt.")
+            if self.storage.snapshot() != receipt["payload"]["after"]:
+                raise ServiceError("revision.conflict", "Committed tree does not match the signed receipt.")
             return {"proposal_id": proposal_id, "state": "committed", "already_committed": True,
                     "committed_revision": proposal["committed_revision"]}
         self._check_revision(expected_revision)

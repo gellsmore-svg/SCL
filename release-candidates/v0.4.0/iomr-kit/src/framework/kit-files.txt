@@ -1,7 +1,10 @@
 .kiro/skills/intent-modelling/SKILL.md
+.kiro/skills/before-the-message/SKILL.md
+.kiro/skills/narrative-arc/SKILL.md
 docs/api-modelling.md
 docs/ci/gitlab-trusted-model.yml
 imk
+meta/required-skills.md
 meta/iomr-model/metamodel.json
 src/examples/consumer-model.json
 src/examples/project-manifest.json

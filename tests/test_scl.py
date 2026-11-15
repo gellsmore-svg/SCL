@@ -73,6 +73,13 @@ class StructuralTests(unittest.TestCase):
         rules = {finding.rule for finding in structural_findings(loaded)}
         self.assertIn("rel.legality", rules)
 
+    def test_illegal_relationship_does_not_count_as_coverage(self):
+        loaded = mini_model()
+        loaded.relationships = [item for item in loaded.relationships if item["type"] != "delivers"]
+        loaded.relationships.append(rel("delivers", "requirement-a", "intent-a"))
+        messages = [finding.message for finding in structural_findings(loaded)]
+        self.assertTrue(any("Intent has no Outcome" in message for message in messages))
+
     def test_deep_refines_and_vector_are_flagged(self):
         loaded = mini_model()
         for record_id, measure in (
@@ -107,6 +114,10 @@ class RuleTests(unittest.TestCase):
     def test_eligibility(self):
         self.assertEqual(classify_path("src/schemas/project-manifest.schema.json"), "consumer")
         self.assertEqual(classify_path("meta/open-questions.md"), "internal")
+        self.assertEqual(classify_path("docs/../meta/open-questions.md"), "internal")
+        self.assertEqual(classify_path("../docs/foo.md"), "other")
+        self.assertEqual(classify_path("./docs/install.md"), "consumer")
+        self.assertEqual(classify_path("./src/prompts/mode-1.md"), "consumer")
         self.assertTrue(release_eligible(["src/prompts/mode-1.md"]))
         self.assertFalse(release_eligible(["changelog/CHANGELOG.md", "meta/open-questions.md"]))
         self.assertFalse(release_eligible(["tests/test_scl.py"]))
@@ -115,6 +126,10 @@ class RuleTests(unittest.TestCase):
         boundary = Boundary("requirement-no-expressiveness-penalty", "breaks_shall", True)
         self.assertEqual(failures({"novel_route": "new"}, [boundary]), [])
         self.assertEqual(failures({"novel_route": "new", "breaks_shall": True}, [boundary]), ["requirement-no-expressiveness-penalty"])
+        self.assertEqual(failures({"breaks_shall": 1}, [boundary]), [])
+        missing = Boundary("requirement-no-expressiveness-penalty", "breaks_shall", None)
+        self.assertEqual(failures({}, [missing]), [])
+        self.assertEqual(failures({"breaks_shall": None}, [missing]), ["requirement-no-expressiveness-penalty"])
 
     def test_gap_challenge_does_not_look_like_a_record(self):
         text = potential_model_gap("obs", "concern", "possibilities", "question")
@@ -402,6 +417,50 @@ class ReviewTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 mermaid_sequence(load_model(root), "model-new")
 
+    def test_slice_ids_cannot_collide(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            model = root / "meta" / "iomr-model"
+            (model / "nodes").mkdir(parents=True)
+            (model / "relationships").mkdir()
+            (root / "imk.json").write_text(json.dumps({"model": "meta/iomr-model"}), encoding="utf-8")
+            (model / "nodes" / "records.json").write_text("[]\n", encoding="utf-8")
+            (model / "relationships" / "links.json").write_text("[]\n", encoding="utf-8")
+            first = inferred_node(
+                "requirement-new", "Requirement", "New", "A proposed rule.", "Inferred from the request text.", "one"
+            )
+            second = inferred_node(
+                "requirement-new", "Requirement", "New", "A proposed rule.", "Inferred from the request text.", "two"
+            )
+            propose_slice(root, "one", [first, dict(first)], [])
+            propose_slice(root, "two", [second], [])
+            findings = proposal_findings(root)
+            self.assertTrue(any(item.rule == "slice.identity" and "duplicate id" in item.message for item in findings))
+            self.assertTrue(any(item.rule == "slice.collision" and "another slice" in item.message for item in findings))
+            integrated = {
+                "id": "requirement-kept",
+                "type": "Intent",
+                "name": "Kept",
+                "description": "An integrated record.",
+                "metadata": {"basis": "stated"},
+            }
+            (model / "nodes" / "records.json").write_text(json.dumps([integrated]) + "\n", encoding="utf-8")
+            shadow = inferred_node(
+                "requirement-kept",
+                "Requirement",
+                "Kept",
+                "A proposed rule.",
+                "Inferred from the request text.",
+                "shadow",
+            )
+            shape = inferred_node(
+                "model-shadow", "Model", "Shadow", "A proposed interaction.", "Inferred from the request text.", "shadow"
+            )
+            propose_slice(root, "shadow", [shadow, shape], [rel("specifies", "requirement-kept", "model-shadow")])
+            shadowed = proposal_findings(root)
+            self.assertTrue(any(item.rule == "slice.collision" and "integrated model" in item.message for item in shadowed))
+            self.assertFalse(any("relationship is not legal" in item.message for item in shadowed if "slice-shadow" in item.message))
+
     def test_discovery_failure_writes_nothing(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -637,6 +696,40 @@ class ReviewTests(unittest.TestCase):
                 any(finding.rule == "framework.release-eligibility" for finding in framework_findings(root))
             )
 
+    def test_release_change_paths_cannot_escape(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _seed_release_root(Path(tmp))
+            _write_release(
+                root,
+                "0.1.0",
+                {"src/schemas/project-manifest.schema.json": b"{}\n"},
+                changes=["../docs/install.md"],
+            )
+            self.assertTrue(
+                any("not in the repository" in finding.message for finding in framework_findings(root))
+            )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _seed_release_root(Path(tmp))
+            (root / "meta" / "open-questions.md").write_text("question\n", encoding="utf-8")
+            _write_release(
+                root,
+                "0.1.0",
+                {"src/schemas/project-manifest.schema.json": b"{}\n"},
+                changes=["docs/../meta/open-questions.md"],
+            )
+            self.assertTrue(
+                any("must not be a release" in finding.message for finding in framework_findings(root))
+            )
+
+    def test_release_scan_reads_python_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = _seed_release_root(Path(tmp))
+            folder = _write_release(root, "0.1.0", {"src/schemas/project-manifest.schema.json": b"{}\n"})
+            (folder / "notes.py").write_text("see https://example.invalid/secret\n", encoding="utf-8")
+            self.assertTrue(
+                any(finding.rule == "framework.self-contained" for finding in framework_findings(root))
+            )
+
     def test_copied_release_validates_without_the_checkout(self):
         with tempfile.TemporaryDirectory() as tmp:
             dest = Path(tmp) / "v0.2.0"
@@ -805,6 +898,163 @@ PROCESS Desk (INPUT: request; OUTPUT: record)
         completed = _run(["export", "cairn"])
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertIn("<submit-process>", completed.stdout)
+
+    def test_process_level_bind_is_rejected(self):
+        from scl.cairn import check_text
+
+        ids = {"requirement-cairn-export"}
+        loose = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  BINDS: not-a-requirement
+  1. <capture-request> Capture the request.
+"""
+        findings, _steps = check_text(loose, ids)
+        self.assertTrue(any(item.rule == "cairn.bind" and "is not a requirement" in item.message for item in findings))
+        real = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  BINDS: requirement-cairn-export
+  1. <capture-request> Capture the request.
+"""
+        attached, _steps = check_text(real, ids)
+        self.assertTrue(any("is not attached to a step" in item.message for item in attached))
+        indented = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request.
+     BINDS: requirement-cairn-export
+"""
+        kept, _steps = check_text(indented, ids)
+        self.assertFalse(any(item.rule == "cairn.bind" for item in kept))
+
+    def test_unfenced_markdown_process_is_kept(self):
+        from cairn_core import parse_document
+
+        text = """\
+## Context
+A person asks for a record.
+
+## Outcomes
+- a record exists
+
+## Process
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request.
+"""
+        document = parse_document(text)
+        self.assertEqual(document.parse_errors, [])
+        self.assertEqual(document.processes[0].steps[0].name, "capture-request")
+        empty = """\
+## Context
+A person asks for a record.
+
+## Process
+
+## Outcomes
+- a record exists
+"""
+        missing = parse_document(empty)
+        self.assertTrue(any("did not contain a process" in error for error in missing.parse_errors))
+
+    def test_scl_tag_does_not_bind_a_prefix(self):
+        from scl.cairn import check_text
+
+        ids = {"requirement-cairn-export"}
+        prefixed = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request. [scl:requirement-cairn-export/evil]
+"""
+        _findings, steps = check_text(prefixed, ids)
+        self.assertEqual(steps[0]["binds"], [])
+        exact = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request. [scl:requirement-cairn-export]
+"""
+        findings, steps = check_text(exact, ids)
+        self.assertEqual(steps[0]["binds"], ["requirement-cairn-export"])
+        self.assertFalse(any(item.rule == "cairn.bind" for item in findings))
+
+    def test_await_prose_does_not_count_as_a_timeout(self):
+        from cairn_core import parse_document, validate_document
+
+        prose = "PROCESS Wait (INPUT: a; OUTPUT: b)\n  1. AWAIT the context from the caller.\n"
+        errors = validate_document(parse_document(prose))
+        self.assertTrue(any("AWAIT must declare TIMEOUT" in error for error in errors))
+        self.assertFalse(any("context-dependent" in error for error in errors))
+        never = "PROCESS Wait (INPUT: a; OUTPUT: b)\n  1. AWAIT never-ending work without a bound.\n"
+        self.assertTrue(any("AWAIT must declare TIMEOUT" in error for error in validate_document(parse_document(never))))
+        bounded = "PROCESS Wait (INPUT: a; OUTPUT: b)\n  1. AWAIT [TIMEOUT: never] the reply.\n"
+        self.assertFalse(any("AWAIT must declare TIMEOUT" in error for error in validate_document(parse_document(bounded))))
+
+    def test_duplicate_step_names_stay_duplicate(self):
+        loaded = mini_model()
+        loaded.nodes[2]["steps"] = [
+            {"from": "system-a", "to": "system-b", "message": "go", "name": "submit-process"},
+            {"from": "system-a", "to": "system-b", "message": "go again", "name": "submit-process"},
+        ]
+        self.assertTrue(
+            any("duplicate step name submit-process" in finding.message for finding in structural_findings(loaded))
+        )
+        text = render_cairn(loaded)
+        self.assertNotIn("submit-process-2", text)
+        self.assertEqual(text.count("<submit-process>"), 2)
+
+    def test_each_process_becomes_its_own_model(self):
+        text = """\
+PROCESS Alpha (INPUT: request; OUTPUT: record)
+  1. <capture-request> Capture the request.
+PROCESS Beta (INPUT: request; OUTPUT: record)
+  1. <record-outcome> Record the outcome.
+"""
+        unnamed = """\
+PROCESS Desk (INPUT: request; OUTPUT: record)
+  1. Capture the request.
+  2. <record-outcome> Record the outcome.
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            model = root / "meta" / "iomr-model"
+            (model / "nodes").mkdir(parents=True)
+            (model / "relationships").mkdir(parents=True)
+            (root / "imk.json").write_text(json.dumps({"model": "meta/iomr-model"}), encoding="utf-8")
+            (model / "nodes" / "records.json").write_text("[]\n", encoding="utf-8")
+            (model / "relationships" / "links.json").write_text("[]\n", encoding="utf-8")
+            refused = propose_cairn(root, unnamed, "desk")
+            self.assertTrue(any(item.rule == "cairn.name" for item in refused))
+            self.assertFalse((model / "nodes" / "slice-desk.json").exists())
+            findings = propose_cairn(root, text, "desk")
+            self.assertEqual(findings, [], [item.message for item in findings])
+            proposed = json.loads((model / "nodes" / "slice-desk.json").read_text(encoding="utf-8"))
+            ids = {node["id"] for node in proposed}
+            self.assertEqual(
+                ids,
+                {
+                    "model-desk-alpha",
+                    "model-desk-beta",
+                    "requirement-capture-request",
+                    "requirement-record-outcome",
+                },
+            )
+            self.assertTrue(all(node["metadata"]["slice"] == "desk" for node in proposed))
+            before = (model / "nodes" / "slice-desk.json").read_text(encoding="utf-8")
+            again = propose_cairn(root, text, "desk")
+            self.assertTrue(any(item.rule == "cairn.slug" for item in again))
+            self.assertEqual((model / "nodes" / "slice-desk.json").read_text(encoding="utf-8"), before)
+
+    def test_corrupt_model_json_is_a_finding(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "repo"
+            shutil.copytree(ROOT, dest, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", "release-candidates"))
+            (dest / "imk.json").write_text("{", encoding="utf-8")
+            completed = _run(["--root", str(dest), "validate", "--strict"])
+            self.assertEqual(completed.returncode, 1, completed.stdout + completed.stderr)
+            self.assertIn("not valid JSON", completed.stdout)
+            self.assertNotIn("record.shape", completed.stdout)
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "repo"
+            shutil.copytree(ROOT, dest, ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc", "release-candidates"))
+            (dest / "meta" / "iomr-model" / "nodes" / "records.json").write_text("{", encoding="utf-8")
+            completed = _run(["--root", str(dest), "validate", "--strict"])
+            self.assertEqual(completed.returncode, 1, completed.stdout + completed.stderr)
+            self.assertIn("model JSON is not valid", completed.stdout)
 
 
 def _seed_release_root(root: Path) -> Path:

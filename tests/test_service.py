@@ -240,6 +240,61 @@ class ServiceTests(unittest.TestCase):
         again=self.call('commit_change',proposal_id=a['proposal_id'],expected_revision=self.revision)
         self.assertTrue(again['data']['already_committed'])
 
+    def test_repropose_after_update_conflicts(self):
+        first=self.propose()
+        stored=self.call('get_proposal',proposal_id=first['proposal_id'])['data']['proposal']
+        changes=stored['changes']
+        changes[0]['record']['description']='The system shall preserve a different reason entirely.'
+        updated=self.call('update_proposal',proposal_id=first['proposal_id'],changes=changes,expected_revision=self.revision,expected_proposal_revision=first['proposal_revision'])
+        self.assertEqual(updated['status'],'ok',updated)
+        again=self.call('add_requirement',record=requirement(),parent_id='model-a',expected_revision=self.revision)
+        self.assertEqual(again['findings'][0]['rule'],'proposal.conflict')
+        kept=self.call('get_proposal',proposal_id=first['proposal_id'])['data']['proposal']
+        self.assertEqual(kept['changes'][0]['record']['description'],'The system shall preserve a different reason entirely.')
+
+    def test_closed_proposal_is_not_reopened_by_the_same_request(self):
+        first=self.propose()
+        self.call('reject_proposal',proposal_id=first['proposal_id'],reason='Not this change.',expected_proposal_revision=first['proposal_revision'])
+        again=self.call('add_requirement',record=requirement(),parent_id='model-a',expected_revision=self.revision)
+        self.assertEqual(again['findings'][0]['rule'],'proposal.conflict')
+
+    def test_already_committed_rejects_a_changed_tree(self):
+        proposal=self.propose()
+        self.commit(proposal['proposal_id'])
+        path=self.root/'knowledge/nodes/domain.json'
+        nodes=json.loads(path.read_text())
+        nodes[0]['description']='Tampered after commit'
+        path.write_bytes(json_bytes(nodes))
+        result=self.call('commit_change',proposal_id=proposal['proposal_id'],expected_revision=self.revision)
+        self.assertEqual(result['findings'][0]['rule'],'revision.conflict')
+        self.assertEqual(json.loads(path.read_text())[0]['description'],'Tampered after commit')
+
+    def test_stated_basis_on_an_inferred_record_becomes_derived(self):
+        record=requirement();record['metadata']['basis']='stated'
+        result=self.call('add_requirement',record=record,parent_id='model-a',expected_revision=self.revision)
+        self.assertEqual(result['data']['validation_status'],'valid',result)
+        self.commit(result['data']['proposal_id'])
+        node=load_model(self.root).by_id['requirement-new-rule']
+        self.assertEqual(node['metadata']['basis'],'derived')
+        self.assertEqual(node['metadata']['provenance'][0]['original_basis'],'inferred')
+
+    def test_retire_does_not_replace_an_existing_relationship(self):
+        from scl.domain import apply_changes
+        loaded=load_model(self.root)
+        existing={'id':'requirement-replacement-rule-supersedes-requirement-a','type':'supersedes','from':'requirement-replacement-rule','to':'requirement-a','rationale':'Already recorded supersession must stay as written.'}
+        loaded.relationships.append(existing)
+        record=requirement('Replacement rule')
+        record.update(id='requirement-replacement-rule',type='Requirement')
+        record['metadata']['basis']='stated'
+        proposal={'id':'proposal-retire','origin':'human-authored','author':'tester','changes':[
+            {'op':'add_record','record':record},
+            {'op':'retire_record','id':'requirement-a','superseded_by':'requirement-replacement-rule','reason':'The new requirement replaces the original constraint.'},
+        ]}
+        with self.assertRaises(ServiceError) as caught:
+            apply_changes(loaded, proposal, 'tester')
+        self.assertEqual(caught.exception.findings[0].rule,'rel.identity')
+        self.assertEqual(existing['rationale'],'Already recorded supersession must stay as written.')
+
     def test_stale_proposal_edit_is_rejected(self):
         p=self.propose()
         r=self.call('update_proposal',proposal_id=p['proposal_id'],changes=[],expected_revision=self.revision,expected_proposal_revision='old')
@@ -397,6 +452,7 @@ class ServiceTests(unittest.TestCase):
         history=load_model(self.root).by_id['requirement-new-rule']['metadata']['provenance']
         self.assertEqual(len(history),2)
         self.assertEqual(history[0]['original_basis'],'inferred')
+        self.assertEqual(history[1]['original_basis'],'derived')
         self.assertTrue(history[1]['previous_record_digest'])
 
     def test_consumer_source_transaction_passes_boundary(self):

@@ -188,7 +188,8 @@ transaction commits, revalidate and request fresh review. Material changes inval
 old signatures even if somebody manually restores the approved flag.
 
 Proposal IDs are content-derived: repeated identical creation returns the same proposal.
-Repeated commit verifies its receipt and reports `already_committed`; it does not reapply.
+A stored proposal with the same id but different changes, or a rejected or committed proposal, is `proposal.conflict`.
+Repeated commit verifies its receipt and the live tree against the signed file map, and reports `already_committed` when they match; it does not reapply.
 Rejected/committed proposals cannot be reopened. `reject_proposal` records a caller
 withdrawal, not an authenticated human review decision. Signed approval is the only
 human authority asserted by this implementation.

@@ -70,17 +70,28 @@ def _plan_lines(lines: list[str]) -> list[str]:
     return out
 
 
-def extract_cairn_source(text: str) -> tuple[str, str]:
-    """Return (cairn_source, source_kind) where kind is ``markdown`` or ``cairn``."""
+def extract_cairn_source(text: str) -> tuple[str, str, list[str]]:
+    """Return (cairn_source, source_kind, gaps). Kind is ``markdown`` or ``cairn``.
+
+    An unfenced Process section is kept. An empty Process or Requirements
+    section is reported as a gap. Requirements prose is not injected into the
+    cairn source.
+    """
+    gaps: list[str] = []
     if "## " not in text and "```" not in text:
-        return text.strip(), "cairn"
+        return text.strip(), "cairn", gaps
 
     lines = text.splitlines()
     blocks: list[str] = []
     section_key: str | None = None
+    section_had_body = False
     in_fence = False
     fence_buf: list[str] = []
     prose_buf: list[str] | None = None
+
+    def note_body() -> None:
+        nonlocal section_had_body
+        section_had_body = True
 
     def flush_prose() -> None:
         nonlocal prose_buf
@@ -94,14 +105,37 @@ def extract_cairn_source(text: str) -> tuple[str, str]:
             plan_body = _plan_lines(prose_buf)
             if plan_body:
                 blocks.append("\n".join(plan_body))
+        elif section_key == "PROCESS":
+            process_body = _plan_lines(prose_buf)
+            if process_body:
+                blocks.append("\n".join(process_body))
+            elif not section_had_body:
+                gaps.append("markdown Process section did not contain a process")
+        elif section_key == "REQUIREMENTS":
+            if not _plan_lines(prose_buf) and not section_had_body:
+                gaps.append("markdown Requirements section did not contain requirements")
         prose_buf = None
+
+    def take_fence(buf: list[str]) -> None:
+        if not buf:
+            return
+        header = section_key or ""
+        # PROCESS/PLAN fences already carry their own header line.
+        if header in {"PROCESS", "PLAN"}:
+            blocks.append("\n".join(buf))
+        elif header:
+            blocks.append(header + "\n" + "\n".join(buf))
+        else:
+            blocks.append("\n".join(buf))
+        note_body()
 
     for line in lines:
         sec = _SECTION.match(line)
         if sec:
             flush_prose()
             section_key = _section_keyword(sec.group(1).strip())
-            if section_key in {"CONTEXT", "OUTCOMES", "PLAN"}:
+            section_had_body = False
+            if section_key in {"CONTEXT", "OUTCOMES", "PLAN", "PROCESS", "REQUIREMENTS"}:
                 prose_buf = []
             else:
                 prose_buf = None
@@ -109,15 +143,7 @@ def extract_cairn_source(text: str) -> tuple[str, str]:
 
         if _FENCE.match(line.strip()):
             if in_fence:
-                if fence_buf:
-                    header = section_key or ""
-                    # PROCESS/PLAN fences already carry their own header line.
-                    if header in {"PROCESS", "PLAN"}:
-                        blocks.append("\n".join(fence_buf))
-                    elif header:
-                        blocks.append(header + "\n" + "\n".join(fence_buf))
-                    else:
-                        blocks.append("\n".join(fence_buf))
+                take_fence(fence_buf)
                 fence_buf = []
                 in_fence = False
             else:
@@ -131,14 +157,8 @@ def extract_cairn_source(text: str) -> tuple[str, str]:
 
     flush_prose()
     if fence_buf:
-        header = section_key or ""
-        if header in {"PROCESS", "PLAN"}:
-            blocks.append("\n".join(fence_buf))
-        elif header:
-            blocks.append(header + "\n" + "\n".join(fence_buf))
-        else:
-            blocks.append("\n".join(fence_buf))
+        take_fence(fence_buf)
 
     if not blocks:
-        return text.strip(), "cairn"
-    return "\n\n".join(blocks).strip(), "markdown"
+        return text.strip(), "cairn", gaps
+    return "\n\n".join(blocks).strip(), "markdown", gaps

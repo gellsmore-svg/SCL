@@ -13,7 +13,7 @@ from scl.findings import Finding
 from scl.framework import framework_findings, release_eligible
 from scl.gap import potential_model_gap
 from scl.gates import behavior_findings
-from scl.model import find_root, load_model, structural_findings
+from scl.model import find_root, load_model, metamodel_findings, structural_findings
 from scl.narrative import mermaid_sequence, mermaid_trace, render_role, traceability
 from scl.skills import verify_skills
 from scl.slice import proposal_findings
@@ -35,7 +35,18 @@ def validate(root: Path, strict: bool, proposals: bool = False) -> int:
         return _skill_halt(skill_findings)
     findings: list[Finding] = []
     if strict:
-        loaded = load_model(root)
+        try:
+            loaded = load_model(root)
+        except json.JSONDecodeError:
+            meta = metamodel_findings(root)
+            if any("not valid JSON" in finding.message for finding in meta):
+                findings.extend(meta)
+            else:
+                findings.append(Finding("record.shape", "model JSON is not valid"))
+            for finding in findings:
+                print(finding.format())
+            print(f"errors: {len(findings)}")
+            return 1
         findings.extend(skill_findings)
         findings.extend(structural_findings(loaded))
         findings.extend(framework_findings(root))

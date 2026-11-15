@@ -36,9 +36,15 @@ OPERATIONS = {
     "link_records": "Propose a legal semantic relationship between existing records.",
     "update_requirement": "Propose changes to an existing Requirement.",
     "import_slice": "Import a legacy slice as a governed proposal; never integrate directly.",
+    "capture_source": "Copy a UTF-8 project file into the model and record it as a source.",
+    "add_question": "Compile one open question into the single project register.",
+    "update_question": "Revise one open question already in the register.",
+    "list_questions": "Read the single open-question register.",
+    "validate_model": "Validate a product model and its question register, without framework release checks.",
 }
 READ_OPERATIONS = {"get_api_schema", "get_context", "get_metamodel", "find_records", "get_record", "get_trace",
-                   "get_dependants", "get_model_revision", "get_proposal", "preview_change", "validate_proposal"}
+                   "get_dependants", "get_model_revision", "get_proposal", "preview_change", "validate_proposal",
+                   "list_questions", "validate_model"}
 
 
 def proposal_revision(proposal):
@@ -114,7 +120,7 @@ class ModelService:
         meta = deepcopy(self.storage.load().metamodel)
         meta["record_conventions"] = {"Requirement": "metadata.acceptance", "Outcome": "metadata.measure",
                                       "Model": "interaction, involves participants, steps with from/to/message"}
-        meta["change_operations"] = ["add_record", "update_record", "add_relationship", "remove_relationship", "retire_record", "declare_source"]
+        meta["change_operations"] = ["add_record", "update_record", "add_relationship", "remove_relationship", "retire_record", "declare_source", "capture_source", "add_question", "update_question"]
         return meta
 
     @staticmethod
@@ -355,6 +361,47 @@ class ModelService:
     def _import_slice(self, slug: str, expected_revision: str):
         changes = self.storage.legacy_changes(slug)
         return self._propose_change("Import legacy slice " + slug, changes, expected_revision)
+
+    def _capture_source(self, alias: str, path: str, ref: str, expected_revision: str, origin: str = "ai-inferred", author: str = "agent"):
+        from scl.model import contained_path
+
+        file_path = contained_path(self.root, path)
+        if file_path is None or not file_path.is_file():
+            raise ServiceError("ref.evidence", "Source must be an existing file inside the project.", alias)
+        try:
+            content = file_path.read_text(encoding="utf-8")
+        except UnicodeError as exc:
+            raise ServiceError("ref.evidence", "Only UTF-8 text can be captured into the model.", alias) from exc
+        if len(content.encode()) > 400_000:
+            raise ServiceError("request.size", "Captured file exceeds 400000 bytes; split it into smaller sources.", alias)
+        change = {"op": "capture_source", "source": {"alias": alias, "path": path, "ref": ref}, "content": content}
+        return self._propose_change(f"Capture source {alias}", [change], expected_revision, origin, author)
+
+    def _add_question(self, question: dict, expected_revision: str, origin: str = "ai-inferred", author: str = "agent"):
+        title = str(question.get("Question") or question.get("ID") or "open question")
+        return self._propose_change(f"Add question: {title}", [{"op": "add_question", "question": question}], expected_revision, origin, author)
+
+    def _update_question(self, question_id: str, patch: dict, expected_revision: str, origin: str = "ai-inferred", author: str = "agent"):
+        return self._propose_change(f"Update question {question_id}", [{"op": "update_question", "id": question_id, "patch": patch}], expected_revision, origin, author)
+
+    def _list_questions(self, offset: int = 0, limit: int = 20):
+        from scl.questions import questions_path
+
+        loaded = self.storage.load()
+        return {"path": "meta/open-questions.md", "present": questions_path(self.root).is_file(),
+                "questions": self._page(loaded.questions, offset, limit)}
+
+    def _validate_model(self):
+        from scl.model import metamodel_findings, structural_findings
+        from scl.questions import question_findings
+
+        loaded = self.storage.load()
+        findings = metamodel_findings(self.root) + structural_findings(loaded) + question_findings(self.root)
+        if findings:
+            error = ServiceError("model.invalid", "Product model or question register is not valid.")
+            error.findings = findings
+            raise error
+        return {"validation_status": "valid", "records": len(loaded.nodes), "questions": len(loaded.questions)}
 
 
 

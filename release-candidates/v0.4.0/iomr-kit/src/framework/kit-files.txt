@@ -6,7 +6,9 @@ docs/ci/gitlab-trusted-model.yml
 imk
 meta/required-skills.md
 meta/iomr-model/metamodel.json
+src/examples/consumer-imk.json
 src/examples/consumer-model.json
+src/examples/question-register.md
 src/examples/project-manifest.json
 src/framework/API_QUICKSTART.md
 src/framework/consume.py

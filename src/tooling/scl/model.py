@@ -53,6 +53,9 @@ class Loaded:
     expect: list = field(default_factory=list)
     metamodel: dict | None = None
     model_location: str = "meta/iomr-model"
+    questions: list[dict] = field(default_factory=list)
+    captures: dict[str, str] = field(default_factory=dict)
+    questions_changed: bool = False
 
     @property
     def by_id(self) -> dict[str, dict]:
@@ -93,6 +96,22 @@ def _collect(directory: Path, include_slices: bool) -> list[dict]:
     return records
 
 
+def _load_questions(root: Path) -> list[dict]:
+    from scl.questions import parse_questions, questions_path
+
+    path = questions_path(root)
+    if not path.is_file():
+        return []
+    return parse_questions(path.read_text(encoding="utf-8"))
+
+
+def path_part(evidence: str) -> str:
+    if not isinstance(evidence, str) or ":" not in evidence:
+        return ""
+    _alias, rest = evidence.split(":", 1)
+    return rest.partition("#")[0]
+
+
 def load_model(root: Path, include_slices: bool = False) -> Loaded:
     config = _read_json(root / "imk.json")
     model_dir = root / config["model"]
@@ -108,6 +127,7 @@ def load_model(root: Path, include_slices: bool = False) -> Loaded:
         relationships=relationships,
         sources=list(config.get("sources") or []),
         expect=list(config.get("expect") or []),
+        questions=_load_questions(root),
     )
 
 
@@ -178,7 +198,13 @@ def metamodel_findings(root: Path) -> list[Finding]:
     return findings
 
 
-def _evidence_finding(root: Path, sources: dict[str, dict], evidence: str, record_id: str) -> Finding | None:
+def _evidence_finding(
+    root: Path,
+    sources: dict[str, dict],
+    evidence: str,
+    record_id: str,
+    captured: str | None = None,
+) -> Finding | None:
     if not isinstance(evidence, str) or ":" not in evidence:
         return Finding("ref.evidence", "evidence must be alias:path#anchor", record_id)
     alias, rest = evidence.split(":", 1)
@@ -194,11 +220,14 @@ def _evidence_finding(root: Path, sources: dict[str, dict], evidence: str, recor
     file_path = contained_path(root, path_part)
     if file_path is None:
         return Finding("context.external", "evidence path escapes the repository", record_id)
-    if not file_path.is_file():
-        return Finding("ref.evidence", f"cited file does not exist: {path_part}", record_id)
+    if captured is None:
+        if not file_path.is_file():
+            return Finding("ref.evidence", f"cited file does not exist: {path_part}", record_id)
+        text = file_path.read_text(encoding="utf-8")
+    else:
+        text = captured
     if not sep or not anchor:
         return Finding("ref.evidence", "evidence is missing #anchor", record_id)
-    text = file_path.read_text(encoding="utf-8")
     lines = text.splitlines()
     if anchor.startswith("L") and anchor[1:2].isdigit():
         body = anchor[1:]
@@ -299,7 +328,14 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
             findings.append(Finding("record.shape", "metadata.evidence must be a list", record_id))
             evidence = []
         for item in evidence:
-            found = _evidence_finding(loaded.root, sources, item, record_id)
+            captured = loaded.captures.get(path_part(item))
+            found = _evidence_finding(
+                loaded.root,
+                sources,
+                item,
+                record_id,
+                captured=captured if isinstance(captured, str) else None,
+            )
             if found:
                 findings.append(found)
         if node.get("type") == "Outcome" and not str(metadata.get("measure") or "").strip():

@@ -505,5 +505,71 @@ print(json.dumps(execute(Path(sys.argv[1]),'commit_change',proposal_id=sys.argv[
         receipt_path.write_bytes(json_bytes(receipt))
         self.assertEqual(verify_transition(base,self.root,self.verifier)[0].rule,'governance.replay')
 
+    def test_validate_model_checks_a_product_without_the_framework_layout(self):
+        self.assertFalse((self.root / 'releases').exists())
+        missing = self.call('validate_model')
+        self.assertEqual(missing['status'], 'error', missing)
+        self.assertIn('missing meta/open-questions.md', missing['findings'][0]['message'])
+
+    def test_question_register_and_captured_source_commit_inside_the_model(self):
+        (self.root / 'docs').mkdir(exist_ok=True)
+        note = self.root / 'docs' / 'note.md'
+        note.write_text('# Product reason\n\nKeep one reason.\n', encoding='utf-8')
+        (self.root / 'meta').mkdir()
+        (self.root / 'meta' / 'open-questions.md').write_text(
+            '# Open questions\n\nThis is the only independent list. Refer to a question by its ID.\n',
+            encoding='utf-8',
+        )
+        self.service = ModelService(self.root, approval=self.verifier)
+        self.revision = self.call('get_model_revision')['model_revision']
+        checked = self.call('validate_model')
+        self.assertEqual(checked['data']['validation_status'], 'valid', checked)
+
+        added = self.call('add_question', question={
+            'Question': 'Which slice owns the stored reason?',
+            'Context': 'The product record can store a reason before a slice is named.',
+            'Raised by': 'agent',
+            'Date raised': '2026-11-15',
+            'Risk Level': 'Medium',
+            'Owner': 'maintainer',
+            'Blocks': 'model-a',
+            'Evidence': 'The note names one product reason.',
+        }, expected_revision=self.revision)
+        self.assertEqual(added['data']['validation_status'], 'valid', added['data'].get('validation_findings'))
+        self.assertNotIn('OQ-001', (self.root / 'meta' / 'open-questions.md').read_text(encoding='utf-8'))
+        self.commit(added['data']['proposal_id'])
+        self.revision = self.call('get_model_revision')['model_revision']
+        register = (self.root / 'meta' / 'open-questions.md').read_text(encoding='utf-8')
+        self.assertIn('- ID: OQ-001', register)
+        self.assertIn('Which slice owns the stored reason?', register)
+
+        mismatched = self.call('propose_change', title='Capture a different note', changes=[{
+            'op': 'capture_source',
+            'source': {'alias': 'note', 'path': 'docs/note.md', 'ref': '2026-11-15'},
+            'content': 'different\n',
+        }], expected_revision=self.revision)
+        self.assertEqual(mismatched['data']['validation_findings'][0]['rule'], 'ref.evidence')
+
+        evidence = ['note:knowledge/sources/note.md#Product reason']
+        changes = [{
+            'op': 'capture_source',
+            'source': {'alias': 'note', 'path': 'docs/note.md', 'ref': '2026-11-15'},
+            'content': note.read_text(encoding='utf-8'),
+        }]
+        for record_id in ('intent-a', 'outcome-a', 'model-a', 'requirement-a'):
+            changes.append({'op': 'update_record', 'id': record_id, 'patch': {'metadata': {'evidence': evidence}}})
+        captured = self.call('propose_change', title='Capture the product note', changes=changes, expected_revision=self.revision)
+        self.assertEqual(captured.get('status'), 'ok', captured)
+        self.assertEqual(captured['data']['validation_status'], 'valid', captured)
+        self.assertFalse((self.root / 'knowledge' / 'sources' / 'note.md').exists())
+        self.commit(captured['data']['proposal_id'])
+        self.assertEqual((self.root / 'knowledge' / 'sources' / 'note.md').read_text(encoding='utf-8'), note.read_text(encoding='utf-8'))
+        self.assertTrue(note.is_file())
+        config = json.loads((self.root / 'imk.json').read_text(encoding='utf-8'))
+        self.assertEqual(config['sources'][0]['path'], 'knowledge/sources/note.md')
+        self.assertEqual(config['sources'][0]['captured_from'], 'docs/note.md')
+        self.service = ModelService(self.root, approval=self.verifier)
+        self.assertEqual(self.call('validate_model')['data']['validation_status'], 'valid')
+
 
 if __name__ == '__main__': unittest.main()

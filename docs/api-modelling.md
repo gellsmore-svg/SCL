@@ -153,6 +153,14 @@ optional `origin` (`ai-inferred` by default) and an `author` claim. Names are cl
 credentials. All changes require review, including those labelled human-authored.
 
 Other operations: `add_intent`, `add_outcome`, `link_records`, `update_requirement`.
+
+## Product sources and the question register
+
+`capture_source` reads a UTF-8 file that is already inside the project, stores that text in the proposal, and on commit writes it under `{model}/sources/`. The source declaration then points at that captured copy and keeps `captured_from` as the original path. Evidence cites the captured path. The original file is not deleted. A captured file must be at most 400000 bytes.
+
+`add_question` compiles one question into `meta/open-questions.md`, the only register. Each question has the eleven fields `ID`, `Question`, `Context`, `Raised by`, `Date raised`, `Status`, `Risk Level`, `Owner`, `Blocks`, `Resolution`, and `Evidence`. Omit `ID` to allocate the next `OQ-` number. `update_question` revises one existing question and cannot change its ID. `list_questions` reads the register.
+
+`validate_model` checks the metamodel, the IOMR graph, and that register. It does not require the SCL release layout. `validate --strict` remains the framework check and still halts when the skill registry is missing. A question or a captured source is still a proposal until a trusted reviewer signs it.
 General updates use `{"op":"update_record","id":"...","patch":{...}}`. Metadata is
 merged one level; lists and other fields are replaced. Id and type are immutable.
 `remove_relationship` requires `id` and a reason of at least 20 characters.

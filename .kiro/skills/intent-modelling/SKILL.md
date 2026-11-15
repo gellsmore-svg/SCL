@@ -46,7 +46,12 @@ Step endpoints must be participants. `refines` remains same-type with the existi
   Related records and links form one transaction; intermediate states need not validate.
 - Use `scl_propose_change` for other coherent transactions. Supported changes:
   `add_record`, `update_record`, `add_relationship`, `remove_relationship`,
-  `retire_record`, `declare_source`. No record deletion is exposed.
+  `retire_record`, `declare_source`, `capture_source`, `add_question`,
+  `update_question`. No record deletion is exposed.
+- `capture_source` copies a UTF-8 project file into `{model}/sources/` and cites that
+  copy. It does not delete the original. `add_question` compiles one question into
+  `meta/open-questions.md`. `validate_model` checks a product model and that register
+  without the framework release layout.
 - Read `validation_status` and `validation_findings` inside `data`, even when the
   operation status is `ok`: storing a draft does not mean its candidate is valid.
 - Fix findings with `scl_update_proposal`. Pass both `expected_revision` and

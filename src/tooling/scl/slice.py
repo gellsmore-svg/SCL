@@ -44,7 +44,7 @@ def propose_slice(root: Path, slug: str, nodes: list[dict], relationships: list[
 
 
 def integrate_slice(root: Path, slug: str) -> None:
-    """Removed unsafe mutation path. Import the slice through ModelService instead."""
+    """Slice files are not approval. Import, approve, and commit go through the service."""
     from scl.contracts import ServiceError
     raise ServiceError("approval.required", "Direct slice integration is disabled. Use import_slice, correct candidate findings, approve_change and commit_change.", slug)
 
@@ -76,6 +76,7 @@ def proposal_findings(root: Path) -> list[Finding]:
         return []
     integrated = load_model(root, include_slices=False)
     findings: list[Finding] = []
+    occupied: dict[str, str] = {}
     for node_path in sorted(node_dir.glob("slice-*.json")):
         slug = node_path.name[len("slice-") : -len(".json")]
         relative = node_path.relative_to(root).as_posix()
@@ -89,6 +90,7 @@ def proposal_findings(root: Path) -> list[Finding]:
             findings.append(rel_error)
             relationships = []
         slice_ids: set[str] = set()
+        slice_nodes: dict[str, dict] = {}
         for node in nodes:
             if not isinstance(node, dict):
                 findings.append(Finding("slice.shape", f"{relative}: record is not an object", slug))
@@ -97,7 +99,17 @@ def proposal_findings(root: Path) -> list[Finding]:
             if not isinstance(record_id, str) or not record_id.strip():
                 findings.append(Finding("slice.shape", f"{relative}: record is missing id", slug))
                 continue
+            if record_id in slice_ids:
+                findings.append(Finding("slice.identity", f"{relative}: duplicate id {record_id}", record_id))
+            elif record_id in integrated.by_id:
+                findings.append(
+                    Finding("slice.collision", f"{relative}: id already exists in the integrated model", record_id)
+                )
+            elif record_id in occupied:
+                findings.append(Finding("slice.collision", f"{relative}: id already exists in another slice", record_id))
             slice_ids.add(record_id)
+            occupied.setdefault(record_id, slug)
+            slice_nodes[record_id] = node
             kind = node.get("type")
             prefix = TYPE_PREFIX.get(kind)
             if prefix is None:
@@ -125,8 +137,11 @@ def proposal_findings(root: Path) -> list[Finding]:
             if source_id not in known or target_id not in known:
                 findings.append(Finding("slice.endpoint", f"{relative}: relationship endpoint is missing", rel_id))
                 continue
-            source = integrated.by_id.get(source_id) or next(item for item in nodes if isinstance(item, dict) and item.get("id") == source_id)
-            target = integrated.by_id.get(target_id) or next(item for item in nodes if isinstance(item, dict) and item.get("id") == target_id)
+            source = slice_nodes.get(source_id) or integrated.by_id.get(source_id)
+            target = slice_nodes.get(target_id) or integrated.by_id.get(target_id)
+            if source is None or target is None:
+                findings.append(Finding("slice.endpoint", f"{relative}: relationship endpoint is missing", rel_id))
+                continue
             rule = LEGAL.get(rel.get("type"))
             if rule is None or not _pairs(rule, source.get("type"), target.get("type")):
                 findings.append(Finding("slice.endpoint", f"{relative}: relationship is not legal", rel_id))

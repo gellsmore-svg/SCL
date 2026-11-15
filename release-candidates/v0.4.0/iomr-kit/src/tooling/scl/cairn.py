@@ -6,6 +6,7 @@ vendored process-description core. They do not import the Deborah package.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -15,7 +16,7 @@ from scl.findings import Finding
 STEP_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*$")
 _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _LEADING_NAME = re.compile(r"^<([A-Za-z][A-Za-z0-9_-]*)>\s*(.*)$")
-_SCL_TAG = re.compile(r"(?:^|[\s,])scl:([A-Za-z][A-Za-z0-9_-]*)", re.I)
+_SCL_TAG = re.compile(r"(?:^|[\s,])scl:([A-Za-z][A-Za-z0-9_-]*)(?=$|[\s,\]])", re.I)
 _PROCESS_TITLE = re.compile(r"[A-Za-z][A-Za-z0-9_-]*(?: [A-Za-z0-9_-]+)*")
 
 
@@ -48,16 +49,6 @@ def _process_title(model: dict) -> str:
     return str(model["id"])
 
 
-def _unique(name: str, used: set[str]) -> str:
-    candidate = name
-    number = 2
-    while candidate in used:
-        candidate = f"{name}-{number}"
-        number += 1
-    used.add(candidate)
-    return candidate
-
-
 def render_cairn(loaded) -> str:
     """Render each model as a Cairn process. Recorded steps keep their names."""
     lines = [
@@ -71,11 +62,10 @@ def render_cairn(loaded) -> str:
         lines.append(f"PROCESS {_process_title(model)}")
         raw_steps = model.get("steps") or []
         if not isinstance(raw_steps, list) or not raw_steps:
-            token = _unique(step_token(str(model["id"]), "model-step"), set())
+            token = step_token(str(model["id"]), "model-step")
             lines.append(f"  1. <{token}> {_prose(str(model.get('description') or model['id']))}.")
             lines.append("")
             continue
-        used: set[str] = set()
         number = 0
         for step in raw_steps:
             if not isinstance(step, dict):
@@ -86,7 +76,6 @@ def render_cairn(loaded) -> str:
                 token = step_token(explicit.strip(), f"step-{number}")
             else:
                 token = step_token(str(step.get("message") or ""), f"step-{number}")
-            token = _unique(token, used)
             message = _prose(str(step.get("message") or token))
             lines.append(f"  {number}. <{token}> {message}.")
             binds = step.get("binds") or []
@@ -146,18 +135,38 @@ def _walk_steps(steps, found: list[dict], process_name: str) -> None:
         _walk_steps(getattr(step, "children", []) or [], found, process_name)
 
 
+def _loose_binds(elements, found: list[dict], process_name: str) -> None:
+    """BINDS sitting on the process, rather than on a step, stay visible."""
+    for element in elements or []:
+        if getattr(element, "keyword", "") != "BINDS":
+            continue
+        binds = [part.strip() for part in str(getattr(element, "text", "") or "").split(",") if part.strip()]
+        found.append(
+            {
+                "name": None,
+                "binds": binds,
+                "text": "",
+                "line": getattr(element, "lineno", 0),
+                "process": process_name,
+                "placement": "process",
+            }
+        )
+
+
+def _take_process(process, found: list[dict]) -> None:
+    process_name = str(getattr(process, "name", "") or "")
+    _loose_binds(getattr(process, "elements", []) or [], found, process_name)
+    _walk_steps(getattr(process, "steps", []) or [], found, process_name)
+
+
 def steps_from_document(doc) -> list[dict]:
     found: list[dict] = []
     for process in getattr(doc, "processes", []) or []:
-        _walk_steps(getattr(process, "steps", []) or [], found, str(getattr(process, "name", "") or ""))
+        _take_process(process, found)
     for plan in getattr(doc, "plans", []) or []:
         process = getattr(plan, "process", None)
         if process is not None:
-            _walk_steps(
-                getattr(process, "steps", []) or [],
-                found,
-                str(getattr(process, "name", "") or ""),
-            )
+            _take_process(process, found)
     return found
 
 
@@ -178,6 +187,8 @@ def binding_findings(requirement_ids: set[str], steps: list[dict]) -> list[Findi
         for bind in step.get("binds") or []:
             if bind not in requirement_ids:
                 findings.append(Finding("cairn.bind", f"{bind} is not a requirement", label or bind))
+            elif step.get("placement") == "process":
+                findings.append(Finding("cairn.bind", f"{bind} is not attached to a step", label or bind))
     return findings
 
 
@@ -198,11 +209,12 @@ def propose_from_process(
     steps: list[dict],
     slug: str,
     inference: str,
+    model_id: str | None = None,
 ) -> tuple[list[dict], list[dict]]:
     """Build a proposed slice. This does not write the authoritative model."""
     from scl.slice import inferred_node
 
-    model_id = f"model-{slug}"
+    model_id = model_id or f"model-{slug}"
     nodes = [
         inferred_node(
             model_id,
@@ -237,9 +249,54 @@ def propose_from_process(
     return nodes, relationships
 
 
+def _process_token(name: str) -> str:
+    token = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "process"
+    if not token[0].isalpha():
+        token = "process-" + token
+    return token
+
+
+def _model_ids(slug: str, process_names: list[str]) -> dict[str, str]:
+    """One process keeps model-{slug}. Several processes each get their own model."""
+    if len(process_names) == 1:
+        return {process_names[0]: f"model-{slug}"}
+    assigned: dict[str, str] = {}
+    used: set[str] = set()
+    for name in process_names:
+        candidate = f"model-{slug}-{_process_token(name)}"
+        number = 2
+        while candidate in used:
+            candidate = f"model-{slug}-{_process_token(name)}-{number}"
+            number += 1
+        used.add(candidate)
+        assigned[name] = candidate
+    return assigned
+
+
+def _other_slice_ids(model: Path, slug: str) -> set[str]:
+    found: set[str] = set()
+    for folder in ("nodes", "relationships"):
+        directory = model / folder
+        if not directory.is_dir():
+            continue
+        for path in directory.glob("slice-*.json"):
+            other = path.name[len("slice-") : -len(".json")]
+            if other == slug:
+                continue
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            rows = data if isinstance(data, list) else [data]
+            for item in rows:
+                if isinstance(item, dict) and isinstance(item.get("id"), str):
+                    found.add(item["id"])
+    return found
+
+
 def propose_cairn(root: Path, text: str, slug: str) -> list[Finding]:
     """Write a slice file. Layer files stay untouched."""
-    from scl.model import load_model
+    from scl.model import contained_path, load_model
     from scl.slice import propose_slice
 
     if _SLUG.fullmatch(slug) is None:
@@ -255,13 +312,46 @@ def propose_cairn(root: Path, text: str, slug: str) -> list[Finding]:
     ]
     if blocking:
         return blocking
-    named = [step for step in steps if step.get("name")]
+    for step in steps:
+        if step.get("placement") == "process":
+            continue
+        name = step.get("name")
+        if not isinstance(name, str) or not name:
+            return [Finding("cairn.name", "propose needs a name on every step", str(step.get("line") or ""))]
+    named = [step for step in steps if step.get("name") and step.get("placement") != "process"]
     if not named:
         return [Finding("cairn.name", "propose needs at least one named step")]
+    order: list[str] = []
+    grouped: dict[str, list[dict]] = {}
+    for step in named:
+        process_name = str(step.get("process") or slug)
+        if process_name not in grouped:
+            order.append(process_name)
+            grouped[process_name] = []
+        grouped[process_name].append(step)
     inference = f"Inferred from Cairn process steps in slice {slug}."
-    title = str(named[0].get("process") or slug)
-    nodes, relationships = propose_from_process(title, named, slug, inference)
-    known = set(loaded.by_id)
+    model_ids = _model_ids(slug, order)
+    nodes: list[dict] = []
+    relationships: list[dict] = []
+    for process_name in order:
+        built_nodes, built_rels = propose_from_process(
+            process_name,
+            grouped[process_name],
+            slug,
+            inference,
+            model_id=model_ids[process_name],
+        )
+        nodes.extend(built_nodes)
+        relationships.extend(built_rels)
+    config = json.loads((root / "imk.json").read_text(encoding="utf-8"))
+    model = contained_path(root, config.get("model", ""))
+    if model is None:
+        return [Finding("cairn.slug", "model path escapes the project", slug)]
+    node_file = model / "nodes" / f"slice-{slug}.json"
+    rel_file = model / "relationships" / f"slice-{slug}.json"
+    if node_file.exists() or rel_file.exists():
+        return [Finding("cairn.slug", f"slice {slug} already exists", slug)]
+    known = set(loaded.by_id) | _other_slice_ids(model, slug)
     collisions = [node["id"] for node in nodes if node["id"] in known]
     if collisions:
         return [Finding("cairn.collision", "proposed id already exists: " + ", ".join(collisions))]

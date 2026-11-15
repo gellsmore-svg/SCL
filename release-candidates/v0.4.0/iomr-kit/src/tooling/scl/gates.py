@@ -233,6 +233,7 @@ def _cairn(loaded: Loaded) -> list[Finding]:
         [{"name": "gate-sample-step", "text": "Record the sample step."}],
         "gate-sample",
         "Inferred from a Cairn step during the gate.",
+        model_id="model-gate-sample",
     )
     if not nodes or not relationships:
         findings.append(Finding("cairn.propose", "proposal produced no records", "requirement-cairn-propose"))

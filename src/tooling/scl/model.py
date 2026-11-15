@@ -146,6 +146,11 @@ def metamodel_findings(root: Path) -> list[Finding]:
         return [Finding("metamodel.identity", "imk.json is missing")]
     try:
         config = _read_json(imk_path)
+    except json.JSONDecodeError:
+        return [Finding("metamodel.identity", "metamodel configuration is not valid JSON")]
+    if not isinstance(config, dict):
+        return [Finding("metamodel.identity", "metamodel configuration must be a JSON object")]
+    try:
         model_dir = contained_path(root, config.get("model", ""))
     except (ValueError, AttributeError):
         model_dir = None
@@ -153,11 +158,10 @@ def metamodel_findings(root: Path) -> list[Finding]:
     if not meta_path.is_file():
         return [Finding("metamodel.identity", "imk.json or metamodel.json is missing")]
     try:
-        config = _read_json(imk_path)
         meta = _read_json(meta_path)
     except json.JSONDecodeError:
         return [Finding("metamodel.identity", "metamodel configuration is not valid JSON")]
-    if not isinstance(config, dict) or not isinstance(meta, dict):
+    if not isinstance(meta, dict):
         return [Finding("metamodel.identity", "metamodel configuration must be a JSON object")]
     declared = (config.get("metamodel"), config.get("metamodelVersion"))
     actual = (meta.get("name"), meta.get("version"))
@@ -305,6 +309,7 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
     incoming_involves: dict[str, list[str]] = {}
     refines: list[dict] = []
     relationship_ids = set()
+    illegal_ids: set[str] = set()
     for rel in loaded.relationships:
         if not isinstance(rel, dict):
             findings.append(Finding("record.shape", "relationship is not an object"))
@@ -337,6 +342,8 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
                     rel_id,
                 )
             )
+            illegal_ids.add(rel_id)
+            continue
         if kind in UP:
             outgoing.setdefault(source_id, []).append((kind, target_id))
         if kind == "involves":
@@ -349,7 +356,11 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
             if not _reaches_intent(node["id"], by_id, outgoing):
                 findings.append(Finding("trace.reach-intent", "record does not trace up to an Intent", node["id"]))
 
-    good_rels = [rel for rel in loaded.relationships if isinstance(rel, dict)]
+    good_rels = [
+        rel
+        for rel in loaded.relationships
+        if isinstance(rel, dict) and str(rel.get("id", "")) not in illegal_ids
+    ]
     delivered = {rel["to"] for rel in good_rels if rel.get("type") == "delivers"}
     served = {rel["to"] for rel in good_rels if rel.get("type") == "serves"}
     specified = {rel["to"] for rel in good_rels if rel.get("type") == "specifies"}
@@ -435,18 +446,29 @@ def structural_findings(loaded: Loaded) -> list[Finding]:
         if not isinstance(steps, list):
             findings.append(Finding("record.shape", "steps must be a list", node["id"]))
             steps = []
+        from scl.cairn import STEP_NAME, step_token
+
+        seen_tokens: set[str] = set()
+        number = 0
         for index, step in enumerate(steps):
             if not isinstance(step, dict):
                 findings.append(Finding("record.shape", f"step {index} is not an object", node["id"]))
                 continue
+            number += 1
             if not str(step.get("message") or "").strip():
                 findings.append(Finding("model.steps", f"step {index} is missing message", node["id"]))
             step_name = step.get("name")
             if step_name is not None:
-                from scl.cairn import STEP_NAME
-
                 if not isinstance(step_name, str) or STEP_NAME.fullmatch(step_name) is None:
                     findings.append(Finding("model.steps", f"step {index} name is not a token", node["id"]))
+            if isinstance(step_name, str) and step_name.strip():
+                token = step_token(step_name.strip(), f"step-{number}")
+            else:
+                token = step_token(str(step.get("message") or ""), f"step-{number}")
+            if token in seen_tokens:
+                findings.append(Finding("model.steps", f"duplicate step name {token}", node["id"]))
+            else:
+                seen_tokens.add(token)
             binds = step.get("binds")
             if binds is not None:
                 if not isinstance(binds, list) or not all(isinstance(item, str) and item.strip() for item in binds):

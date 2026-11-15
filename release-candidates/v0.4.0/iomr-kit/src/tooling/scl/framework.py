@@ -44,9 +44,32 @@ def release_dirs(root: Path) -> list[Path]:
     return sorted(found, key=lambda path: version_tuple(path.name[1:]))
 
 
+def normalize_repo_path(path: str) -> str | None:
+    """Collapse ``.`` and internal ``..``. Reject absolute paths and paths that escape."""
+    if not isinstance(path, str) or not path.strip():
+        return None
+    if path.startswith(("/", "\\", "~")):
+        return None
+    parts: list[str] = []
+    for part in path.split("/"):
+        if part in ("", "."):
+            continue
+        if part == "..":
+            if not parts:
+                return None
+            parts.pop()
+            continue
+        parts.append(part)
+    if not parts:
+        return None
+    return "/".join(parts)
+
+
 def classify_path(path: str) -> str:
     """Return consumer, internal, or other for one repo-relative path."""
-    relative = path.lstrip("./")
+    relative = normalize_repo_path(path)
+    if relative is None:
+        return "other"
     if relative in CONSUMER_FILES or any(relative.startswith(prefix) for prefix in CONSUMER_PREFIXES):
         return "consumer"
     if any(relative.startswith(prefix) for prefix in INTERNAL_PREFIXES):
@@ -215,7 +238,17 @@ def framework_findings(root: Path) -> list[Finding]:
                 for line in changes.read_text(encoding="utf-8").splitlines()
                 if line.strip() and not line.startswith("#")
             ]
-            absent = [item for item in changed if not (root / item).exists()]
+            from scl.model import contained_path
+
+            normalized: list[str] = []
+            absent: list[str] = []
+            for item in changed:
+                relative = normalize_repo_path(item)
+                resolved = contained_path(root, relative) if relative else None
+                if resolved is None or not resolved.exists():
+                    absent.append(item)
+                else:
+                    normalized.append(relative)
             if absent:
                 findings.append(
                     Finding(
@@ -224,7 +257,7 @@ def framework_findings(root: Path) -> list[Finding]:
                         name,
                     )
                 )
-            elif not release_eligible(changed):
+            elif not release_eligible(normalized):
                 findings.append(
                     Finding(
                         "framework.release-eligibility",
@@ -244,10 +277,11 @@ def framework_findings(root: Path) -> list[Finding]:
                         name,
                     )
                 )
+        binary_suffixes = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".pdf", ".zip", ".whl", ".pyc"}
         for path in folder.rglob("*"):
             if not path.is_file():
                 continue
-            if path.suffix.lower() not in {".md", ".json", ".txt", ""} and path.name != "MANIFEST.sha256":
+            if path.suffix.lower() in binary_suffixes:
                 continue
             try:
                 text = path.read_text(encoding="utf-8")

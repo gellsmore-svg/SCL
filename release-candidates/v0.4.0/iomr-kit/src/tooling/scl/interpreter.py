@@ -33,6 +33,10 @@ def failures(solution: dict, boundaries: list[Boundary]) -> list[str]:
     """
     violated = []
     for boundary in boundaries:
-        if solution.get(boundary.field) == boundary.forbidden_value:
+        if boundary.field not in solution:
+            continue
+        value = solution[boundary.field]
+        # Absence is not None, and 1 is not True. Compare the stored type.
+        if type(value) is type(boundary.forbidden_value) and value == boundary.forbidden_value:
             violated.append(boundary.requirement_id)
     return violated

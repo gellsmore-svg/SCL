@@ -58,16 +58,28 @@ def normalize(changes: list[dict], origin: str) -> list[dict]:
 
 def _provenance(record: dict, proposal: dict, reviewer: str, original: dict | None) -> None:
     metadata = record.setdefault("metadata", {})
-    original_basis = metadata.get("basis")
+    # Record the basis and status from before this patch. A caller cannot
+    # label a new inferred record as stated, and an update must not rewrite
+    # the history of the record it replaced.
+    if original is None:
+        prior_status = record.get("status")
+        if proposal.get("origin") == "ai-inferred":
+            prior_basis = "inferred"
+        else:
+            prior_basis = metadata.get("basis")
+    else:
+        prior_metadata = original.get("metadata") or {}
+        prior_basis = prior_metadata.get("basis")
+        prior_status = original.get("status")
     entry = {"proposal_id": proposal["id"], "change_digest": digest(proposal["changes"]),
              "origin": proposal["origin"], "author_claim": proposal["author"],
-             "original_basis": original_basis, "original_status": record.get("status"),
+             "original_basis": prior_basis, "original_status": prior_status,
              "inference": metadata.get("inference"), "evidence": deepcopy(metadata.get("evidence", [])),
              "reviewer": reviewer, "previous_record_digest": digest(original) if original else None}
     # Never trust caller-supplied provenance, or erase historical changes on update.
     history = deepcopy((original or {}).get("metadata", {}).get("provenance", []))
     metadata["provenance"] = history + [entry]
-    if original_basis == "inferred":
+    if proposal.get("origin") == "ai-inferred" or prior_basis == "inferred":
         metadata["basis"] = "derived"
     if record.get("status") == "proposed":
         record["status"] = "planned"
@@ -112,6 +124,8 @@ def apply_changes(loaded: Loaded, proposal: dict, reviewer: str = "pending-revie
             if rid not in nodes:
                 raise ServiceError("record.missing", "Find an existing record before updating it.", rid)
             old = deepcopy(nodes[rid])
+            if old.get("status") == "retired":
+                raise ServiceError("status.transition", "Retired records are immutable; add a replacement.", rid)
             patch = deepcopy(change.get("patch", {}))
             if any(key in patch for key in ("id", "type")):
                 raise ServiceError("record.identity", "Record id and type are immutable; retire/supersede instead.", rid)
@@ -123,10 +137,13 @@ def apply_changes(loaded: Loaded, proposal: dict, reviewer: str = "pending-revie
                 if not replacement:
                     raise ServiceError("status.discipline", "Retirement requires superseded_by and a same-type replacement.", rid)
                 rel = relationship("supersedes", replacement, rid, change.get("reason"))
+                if rel["id"] in links or any(
+                    (item["from"], item["type"], item["to"]) == (rel["from"], rel["type"], rel["to"])
+                    for item in links.values()
+                ):
+                    raise ServiceError("rel.identity", "Relationship already exists; reuse it.", rel["id"])
                 links[rel["id"]] = rel
                 destructive.append(rid)
-            if old.get("status") == "retired":
-                raise ServiceError("status.transition", "Retired records are immutable; add a replacement.", rid)
             if patch.get("status") == "retired" and op != "retire_record":
                 raise ServiceError("status.transition", "Use retire_record to preserve supersession history.", rid)
             if "metadata" in patch:

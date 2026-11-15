@@ -302,6 +302,9 @@ def _validate_process(
         if isinstance(element, ConstructLine) and element.construct in _LOOP_CONSTRUCTS:
             loop_depth = max(loop_depth, 1)
             errors.extend(_validate_construct_line(element, loop_depth=loop_depth, require_llm_bound=False))
+    for element in proc.elements:
+        if isinstance(element, Annotation):
+            errors.extend(_validate_annotations([element], declared_states, element.lineno, model))
 
     seen_names: set[str] = set()
     for step in proc.steps:
@@ -749,24 +752,28 @@ def _check_iteration_bound(step: Step, lineno: int) -> list[str]:
     return [f"line {lineno}: {step.construct} with LLM involvement must declare {need} or UNTIL"]
 
 
+def _declares_timeout(modifiers, text: str, parsed, annotations=()) -> bool:
+    """TIMEOUT comes from a modifier, a construct-line key, or a TIMEOUT: token."""
+    keys = _bound_keys_from(list(modifiers or []), str(text or ""), [], parsed or {})
+    if "TIMEOUT" in keys:
+        return True
+    for annotation in annotations or []:
+        if getattr(annotation, "keyword", "") == "TIMEOUT":
+            return True
+        if re.search(r"\bTIMEOUT\s*:", str(getattr(annotation, "text", "") or ""), re.I):
+            return True
+    return False
+
+
 def _check_await_timeout(step: Step, lineno: int) -> list[str]:
-    # Check for TIMEOUT in annotations or construct lines for AWAIT
-    has_timeout = False
-    if "TIMEOUT" in step.annotations:
-        has_timeout = True
     parsed_step = getattr(step, "parsed_modifiers", {}) or {}
-    if "TIMEOUT" in getattr(step, "modifiers", []) or "TIMEOUT" in parsed_step:
-        has_timeout = True
+    if _declares_timeout(getattr(step, "modifiers", []), step.text, parsed_step, step.annotations):
+        return []
     for cline in step.construct_lines:
         parsed = getattr(cline, "parsed_modifiers", {}) or {}
-        if "TIMEOUT" in cline.modifiers or "TIMEOUT" in str(cline.text).upper() or "TIMEOUT" in parsed:
-            has_timeout = True
-    if not has_timeout and "TIMEOUT" not in str(step.text).upper():
-        # Allow "never" or context-dependent as in examples
-        text = str(step.text).lower() + " " + str(step.annotations)
-        if "never" not in text and "context" not in text and "variable" not in text:
-            return [f"line {lineno}: AWAIT must declare TIMEOUT or use 'never'/'context-dependent'"]
-    return []
+        if _declares_timeout(cline.modifiers, cline.text, parsed):
+            return []
+    return [f"line {lineno}: AWAIT must declare TIMEOUT"]
 
 
 def _ephemeral_state_names(proc: Process) -> set[str]:

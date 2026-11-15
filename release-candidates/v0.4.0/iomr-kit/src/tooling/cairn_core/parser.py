@@ -530,7 +530,9 @@ def _parse_modifiers_dict(mods: list[str]) -> dict[str, str]:
 
 def parse_document(text: str, model: ValidationMetamodel | None = None) -> CairnDocument:
     """Parse Cairn skeleton text or markdown-wrapped ``.cairn.md`` content."""
-    source, kind = extract_cairn_source(text)
+    source, kind, gaps = extract_cairn_source(text)
     lines = tokenize_lines(source)
     parser = Parser(lines, model)
-    return parser.parse_document(source_kind=kind)
+    document = parser.parse_document(source_kind=kind)
+    document.parse_errors.extend(gaps)
+    return document

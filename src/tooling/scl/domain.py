@@ -269,7 +269,8 @@ def _capture_source(candidate: Loaded, change: dict) -> None:
     original = contained_path(candidate.root, source["path"])
     if original is not None and original.is_file():
         try:
-            disk = original.read_text(encoding="utf-8")
+            # Decode the raw bytes. Path.read_text translates newlines and would drop CR.
+            disk = original.read_bytes().decode("utf-8")
         except UnicodeError as exc:
             raise ServiceError("ref.evidence", "Only UTF-8 text can be captured into the model.", source["alias"]) from exc
         if disk != content:

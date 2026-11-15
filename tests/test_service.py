@@ -597,5 +597,25 @@ print(json.dumps(execute(Path(sys.argv[1]),'commit_change',proposal_id=sys.argv[
         self.assertEqual(rejected['findings'][0]['rule'], 'request.size')
         self.assertEqual(before, list((self.root / '.scl' / 'proposals').glob('*.json')))
 
+    def test_capture_preserves_crlf_bytes(self):
+        (self.root / 'docs').mkdir(exist_ok=True)
+        note = self.root / 'docs' / 'crlf.txt'
+        raw = b'Keep both bytes.\r\nSecond line.\r\n'
+        note.write_bytes(raw)
+        evidence = ['crlf:knowledge/sources/crlf.txt#L1']
+        changes = [{
+            'op': 'capture_source',
+            'source': {'alias': 'crlf', 'path': 'docs/crlf.txt', 'ref': 'sha256:crlf'},
+            'content': raw.decode('utf-8'),
+        }]
+        for record_id in ('intent-a', 'outcome-a', 'model-a', 'requirement-a'):
+            changes.append({'op': 'update_record', 'id': record_id, 'patch': {'metadata': {'evidence': evidence}}})
+        captured = self.call('propose_change', title='Capture CR LF', changes=changes, expected_revision=self.revision)
+        self.assertEqual(captured.get('status'), 'ok', captured)
+        self.assertEqual(captured['data']['validation_status'], 'valid', captured)
+        self.commit(captured['data']['proposal_id'])
+        self.assertEqual((self.root / 'knowledge' / 'sources' / 'crlf.txt').read_bytes(), raw)
+        self.assertEqual(note.read_bytes(), raw)
+
 
 if __name__ == '__main__': unittest.main()

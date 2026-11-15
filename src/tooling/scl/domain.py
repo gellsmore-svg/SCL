@@ -229,6 +229,10 @@ def candidate_findings(candidate: Loaded) -> list[Finding]:
     return findings
 
 
+# A product file is copied whole. 32 MB covers the largest tracked research
+# table in the consumer repositories without splitting bytes across proposals.
+MAX_CAPTURE_BYTES = 32_000_000
+
 _CAPTURE_SUFFIXES = {".md", ".txt", ".json", ".yml", ".yaml", ".rst", ".toml"}
 
 
@@ -258,8 +262,8 @@ def _capture_source(candidate: Loaded, change: dict) -> None:
         raise ServiceError("ref.evidence", "Captured source needs source metadata and UTF-8 content.")
     if not all(isinstance(source.get(key), str) and source[key].strip() for key in ("alias", "path", "ref")):
         raise ServiceError("ref.evidence", "Source needs alias, repository-relative path and immutable reference.")
-    if len(content.encode()) > 400_000:
-        raise ServiceError("request.size", "Captured file exceeds 400000 bytes; split it into smaller sources.", source["alias"])
+    if len(content.encode()) > MAX_CAPTURE_BYTES:
+        raise ServiceError("request.size", "Captured file exceeds 32000000 bytes, so it cannot be copied whole.", source["alias"])
     if any(item.get("alias") == source["alias"] for item in candidate.sources):
         raise ServiceError("ref.evidence", "Source alias already exists; reuse it.", source["alias"])
     original = contained_path(candidate.root, source["path"])

@@ -571,5 +571,31 @@ print(json.dumps(execute(Path(sys.argv[1]),'commit_change',proposal_id=sys.argv[
         self.service = ModelService(self.root, approval=self.verifier)
         self.assertEqual(self.call('validate_model')['data']['validation_status'], 'valid')
 
+    def test_capture_keeps_a_file_larger_than_the_old_400kb_cap(self):
+        from scl.domain import MAX_CAPTURE_BYTES
+
+        (self.root / 'docs').mkdir(exist_ok=True)
+        wide = self.root / 'docs' / 'wide.txt'
+        wide.write_text('a' * 400_001, encoding='utf-8')
+        captured = self.call(
+            'capture_source', alias='wide', path='docs/wide.txt', ref='sha256:wide',
+            expected_revision=self.revision,
+        )
+        self.assertEqual(captured.get('status'), 'ok', captured)
+        self.assertNotIn('request.size', [item['rule'] for item in captured['data'].get('validation_findings', [])])
+        stored = json.loads(next((self.root / '.scl' / 'proposals').glob('*.json')).read_text(encoding='utf-8'))
+        self.assertEqual(stored['changes'][0]['content'], wide.read_text(encoding='utf-8'))
+
+        huge = self.root / 'docs' / 'huge.txt'
+        huge.write_text('b' * (MAX_CAPTURE_BYTES + 1), encoding='utf-8')
+        before = list((self.root / '.scl' / 'proposals').glob('*.json'))
+        rejected = self.call(
+            'capture_source', alias='huge', path='docs/huge.txt', ref='sha256:huge',
+            expected_revision=self.revision,
+        )
+        self.assertEqual(rejected['status'], 'error', rejected)
+        self.assertEqual(rejected['findings'][0]['rule'], 'request.size')
+        self.assertEqual(before, list((self.root / '.scl' / 'proposals').glob('*.json')))
+
 
 if __name__ == '__main__': unittest.main()

@@ -12,6 +12,8 @@ Process-level binds, proposal identity, release path checks, and the copied kit'
 
 A product can capture a UTF-8 source into its model, compile an open question into `meta/open-questions.md`, and validate that model without the framework release layout.
 
+A captured source is the complete UTF-8 file, up to 32 MB, so a large research table is not split or truncated.
+
 ## 0.3.0
 
 The model can be read as a Cairn process with stable step names. A Cairn document can be checked against requirement ids, and a named process can be proposed as a slice that stays out of the model until a person approves it.

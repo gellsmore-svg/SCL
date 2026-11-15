@@ -7,7 +7,15 @@ from pathlib import Path
 
 from scl.approval import ApprovalVerifier, UnavailableApproval, verifier_from_environment
 from scl.contracts import ServiceError, result
-from scl.domain import apply_changes, candidate_findings, dependants, digest, normalize, relationship
+from scl.domain import (
+    MAX_CAPTURE_BYTES,
+    apply_changes,
+    candidate_findings,
+    dependants,
+    digest,
+    normalize,
+    relationship,
+)
 from scl.model import UP
 from scl.skills import verify_skills
 from scl.storage import JsonStorage, Storage
@@ -66,8 +74,10 @@ class ModelService:
                 operation = operation[4:]
             if operation not in OPERATIONS:
                 raise ServiceError("request.operation", "Unknown operation; use get_context for discovery.")
-            if len(json.dumps(params)) > 1_000_000:
-                raise ServiceError("request.size", "Request exceeds 1 MB; split it into coherent proposals.")
+            # Capture carries the whole file inside the request. 40 MB leaves
+            # room for JSON escaping of one 32 MB source.
+            if len(json.dumps(params)) > 40_000_000:
+                raise ServiceError("request.size", "Request exceeds 40 MB; split it into coherent proposals.")
             with self.storage.locked(readonly=operation in READ_OPERATIONS):
                 # Do not bypass an existing project's significant-operation skill gates.
                 if (self.root / "meta/required-skills.md").exists() or (self.root / "validate-framework.py").is_file():
@@ -372,8 +382,8 @@ class ModelService:
             content = file_path.read_text(encoding="utf-8")
         except UnicodeError as exc:
             raise ServiceError("ref.evidence", "Only UTF-8 text can be captured into the model.", alias) from exc
-        if len(content.encode()) > 400_000:
-            raise ServiceError("request.size", "Captured file exceeds 400000 bytes; split it into smaller sources.", alias)
+        if len(content.encode()) > MAX_CAPTURE_BYTES:
+            raise ServiceError("request.size", "Captured file exceeds 32000000 bytes, so it cannot be copied whole.", alias)
         change = {"op": "capture_source", "source": {"alias": alias, "path": path, "ref": ref}, "content": content}
         return self._propose_change(f"Capture source {alias}", [change], expected_revision, origin, author)
 

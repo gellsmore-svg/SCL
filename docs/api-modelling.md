@@ -156,7 +156,7 @@ Other operations: `add_intent`, `add_outcome`, `link_records`, `update_requireme
 
 ## Product sources and the question register
 
-`capture_source` reads a UTF-8 file that is already inside the project, stores that text in the proposal, and on commit writes it under `{model}/sources/`. The source declaration then points at that captured copy and keeps `captured_from` as the original path. Evidence cites the captured path. The original file is not deleted. A captured file must be at most 400000 bytes.
+`capture_source` reads a UTF-8 file that is already inside the project, stores that text in the proposal, and on commit writes it under `{model}/sources/`. The source declaration then points at that captured copy and keeps `captured_from` as the original path. Evidence cites the captured path. The original file is not deleted. The copy is the complete file, up to 32 MB.
 
 `add_question` compiles one question into `meta/open-questions.md`, the only register. Each question has the eleven fields `ID`, `Question`, `Context`, `Raised by`, `Date raised`, `Status`, `Risk Level`, `Owner`, `Blocks`, `Resolution`, and `Evidence`. Omit `ID` to allocate the next `OQ-` number. `update_question` revises one existing question and cannot change its ID. `list_questions` reads the register.
 

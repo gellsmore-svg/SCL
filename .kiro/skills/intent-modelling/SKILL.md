@@ -48,8 +48,8 @@ Step endpoints must be participants. `refines` remains same-type with the existi
   `add_record`, `update_record`, `add_relationship`, `remove_relationship`,
   `retire_record`, `declare_source`, `capture_source`, `add_question`,
   `update_question`. No record deletion is exposed.
-- `capture_source` copies a UTF-8 project file into `{model}/sources/` and cites that
-  copy. It does not delete the original. `add_question` compiles one question into
+- `capture_source` copies a whole UTF-8 project file, up to 32 MB, into `{model}/sources/`
+  and cites that copy. It does not delete the original. `add_question` compiles one question into
   `meta/open-questions.md`. `validate_model` checks a product model and that register
   without the framework release layout.
 - Read `validation_status` and `validation_findings` inside `data`, even when the

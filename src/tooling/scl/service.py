@@ -379,7 +379,8 @@ class ModelService:
         if file_path is None or not file_path.is_file():
             raise ServiceError("ref.evidence", "Source must be an existing file inside the project.", alias)
         try:
-            content = file_path.read_text(encoding="utf-8")
+            # Keep CR LF. Path.read_text would translate it and lose those bytes.
+            content = file_path.read_bytes().decode("utf-8")
         except UnicodeError as exc:
             raise ServiceError("ref.evidence", "Only UTF-8 text can be captured into the model.", alias) from exc
         if len(content.encode()) > MAX_CAPTURE_BYTES:

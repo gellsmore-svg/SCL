@@ -12,7 +12,7 @@ Process-level binds, proposal identity, release path checks, and the copied kit'
 
 A product can capture a UTF-8 source into its model, compile an open question into `meta/open-questions.md`, and validate that model without the framework release layout.
 
-A captured source is the complete UTF-8 file, up to 32 MB, so a large research table is not split or truncated.
+A captured source is the complete UTF-8 file, up to 32 MB, so a large research table is not split or truncated. Line endings are kept as they are in the file.
 
 ## 0.3.0
 
